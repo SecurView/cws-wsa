@@ -1,0 +1,488 @@
+{
+  "name": "SecurView",
+  "user": "usr1",{}
+  "filterPolicies": [
+    {
+      "name": "FilterOne",
+      "taxonomyVer": "1412198384",
+      "createdDate": "2014-11-11T00:00:00.000Z",
+      "blacklist": [
+        {
+          "address": "63.123.254.100/32"
+        },
+        {
+          "address": "63.123.254.200/32"
+        }
+      ],
+      "whitelist": [
+        {
+          "address": "63.123.254.250/32"
+        }
+      ],
+      "contentTypes": [
+        {
+          "contentType": "text/customsv"
+        },
+        {
+          "contentType": "audio/x-wav"
+        },
+        {
+          "contentType": "text/customsv2"
+        },
+        {
+          "contentType": "audio/x-midi"
+        },
+        {
+          "contentType": "image/png"
+        },
+        {
+          "contentType": "video/quicktime"
+        },
+        {
+          "contentType": "application/x-shockwave-flash"
+        },
+        {
+          "contentType": "image/tiff"
+        },
+        {
+          "contentType": "video/avi"
+        },
+        {
+          "contentType": "audio/x-msvideo"
+        },
+        {
+          "contentType": "image/bmp"
+        },
+        {
+          "contentType": "video/mpeg"
+        },
+        {
+          "contentType": "application/x-gzip"
+        }
+      ],
+      "httpCategories": [
+        {
+          "name": "c:adlt",
+          "log": true,
+          "block": true
+        },
+        {
+          "name": "c:alc",
+          "log": true,
+          "block": true
+        },
+        {
+          "name": "c:extr",
+          "log": true,
+          "block": true
+        },
+        {
+          "name": "c:hack",
+          "log": true,
+          "block": true
+        }
+      ],
+      "httpsCategories": [],
+      "customRegex": [],
+      "preConfRegex": [
+        {
+          "label": "Diners Club",
+          "expression": "^3(?:0[0-5]|[68][0-9])[0-9]{11}$"
+        },
+        {
+          "label": "American Express",
+          "expression": "^3[47][0-9]{13}$"
+        },
+        {
+          "label": "All major credit cards",
+          "expression": "^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6011[0-9]{12}|3(?:0[0-5]|[68][0-9])[0-9]{11}|3[47][0-9]{13}|(?:2131|1800)\\d{11})$"
+        }
+      ],
+      "customUserAgents": [],
+      "preDefUserAgents": [
+        {
+          "name": "All Versions",
+          "pattern": "Chrome/"
+        },
+        {
+          "name": "Safari 3",
+          "pattern": "Version/3*Safari"
+        },
+        {
+          "name": "Safari 4",
+          "pattern": "Version/4*Safari"
+        },
+        {
+          "name": "Internet Explorer 11",
+          "pattern": "Trident/7.*rv:11.*like Gecko"
+        },
+        {
+          "name": "Internet Explorer 10",
+          "pattern": "MSIE 10."
+        },
+        {
+          "name": "Safari 5",
+          "pattern": "Version/5*Safari"
+        },
+        {
+          "name": "All Versions",
+          "pattern": "Version/*Safari"
+        },
+        {
+          "name": "Internet Explorer 7",
+          "pattern": "MSIE 7.0"
+        },
+        {
+          "name": "Internet Explorer 8",
+          "pattern": "MSIE 8.0"
+        },
+        {
+          "name": "Internet Explorer 9",
+          "pattern": "MSIE 9.0"
+        },
+        {
+          "name": "All Versions",
+          "pattern": "MSIE"
+        },
+        {
+          "name": "All Versions",
+          "pattern": "Firefox"
+        }
+      ],
+      "filterProtocols": [
+        {
+          "filterProtocol": "HTTPS"
+        },
+        {
+          "filterProtocol": "FTP"
+        }
+      ],
+      "inboundExtensions": [
+        {
+          "extension": "avi"
+        },
+        {
+          "extension": "m4a"
+        },
+        {
+          "extension": "mp3"
+        }
+      ],
+      "outboundExtensions": [
+        {
+          "extension": "emu"
+        },
+        {
+          "extension": "exe"
+        },
+        {
+          "extension": "jar"
+        }
+      ],
+      "avcSelections": [
+        {
+          "applicationMnemonic": "enterprise"
+        },
+        {
+          "applicationMnemonic": "im",
+          "behaviourMnemonic": "post"
+        },
+        {
+          "applicationMnemonic": "im",
+          "behaviourMnemonic": "video_chat"
+        },
+        {
+          "applicationMnemonic": "webposting",
+          "behaviourMnemonic": "downld"
+        },
+        {
+          "applicationMnemonic": "webposting",
+          "behaviourMnemonic": "export"
+        },
+        {
+          "applicationMnemonic": "webposting",
+          "behaviourMnemonic": "import"
+        }
+      ]
+    },
+    {
+      "name": "default",
+      "createdDate": "2014-11-10T00:00:00.000Z",
+      "blacklist": [],
+      "whitelist": [],
+      "contentTypes": [],
+      "httpCategories": [],
+      "httpsCategories": [],
+      "customRegex": [],
+      "preConfRegex": [],
+      "customUserAgents": [],
+      "preDefUserAgents": [],
+      "filterProtocols": [],
+      "inboundExtensions": [],
+      "outboundExtensions": [],
+      "avcSelections": []
+    }
+  ],
+  "schedules": [
+    {
+      "name": "anytime",
+      "from": "00:00",
+      "to": "00:00",
+      "days": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "timezone": "GMT"
+    },
+    {
+      "name": "working hours",
+      "from": "09:00",
+      "to": "18:00",
+      "days": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false
+      ],
+      "timezone": "GMT"
+    },
+    {
+      "name": "lunch",
+      "from": "12:00",
+      "to": "14:00",
+      "days": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false
+      ],
+      "timezone": "GMT"
+    }
+  ],
+  "authGroups": [
+    {
+      "name": "default",
+      "groupType": "CUSTOM",
+      "users": [],
+      "directoryUsers": []
+    },
+    {
+      "name": "engineering",
+      "groupType": "CUSTOM",
+      "users": [
+        {
+          "name": "usr1",
+          "email": "usr1@securview.com",
+          "mobile": false,
+          "agentLicenseReq": false
+        },
+        {
+          "name": "usr2",
+          "email": "usr2@securview.com",
+          "mobile": false,
+          "agentLicenseReq": false
+        },
+        {
+          "name": "usr3",
+          "email": "usr3@securview.com",
+          "mobile": false,
+          "agentLicenseReq": false
+        }
+      ],
+      "directoryUsers": []
+    },
+    {
+      "name": "TestCustomGroup",
+      "groupType": "CUSTOM",
+      "users": [],
+      "directoryUsers": []
+    },
+    {
+      "name": "WinNT://securview/soc",
+      "groupType": "CUSTOM",
+      "users": [],
+      "directoryUsers": []
+    },
+    {
+      "name": "WinNT://securview/engineering",
+      "groupType": "CUSTOM",
+      "users": [],
+      "directoryUsers": []
+    }
+  ],
+  "httpsCerts": [],
+  "advRules": [
+    {
+      "name": "Rule2",
+      "advAction": 1,
+      "enabled": false,
+      "seqNumber": 2,
+      "advRuleArguments": [
+        {
+          "argType": 1,
+          "exception": false,
+          "filterPolicyName": "FilterOne"
+        },
+        {
+          "argType": 2,
+          "exception": false,
+          "scheduleName": "anytime"
+        },
+        {
+          "argType": 3,
+          "exception": false,
+          "authGroupName": "default"
+        }
+      ]
+    },
+    {
+      "name": "Rule1",
+      "description": "Rule one for test",
+      "advAction": 0,
+      "enabled": false,
+      "seqNumber": 1,
+      "advRuleArguments": [
+        {
+          "argType": 1,
+          "exception": false,
+          "filterPolicyName": "FilterOne"
+        },
+        {
+          "argType": 2,
+          "exception": false,
+          "scheduleName": "anytime"
+        },
+        {
+          "argType": 2,
+          "exception": false,
+          "scheduleName": "working hours"
+        },
+        {
+          "argType": 3,
+          "exception": false,
+          "authGroupName": "default"
+        }
+      ]
+    },
+    {
+      "name": "Rule4",
+      "advAction": 1,
+      "enabled": false,
+      "seqNumber": 4,
+      "advRuleArguments": [
+        {
+          "argType": 1,
+          "exception": true,
+          "filterPolicyName": "FilterOne"
+        },
+        {
+          "argType": 2,
+          "exception": true,
+          "scheduleName": "anytime"
+        },
+        {
+          "argType": 3,
+          "exception": false,
+          "authGroupName": "default"
+        }
+      ]
+    },
+    {
+      "name": "Rule3",
+      "advAction": 0,
+      "enabled": false,
+      "seqNumber": 3,
+      "advRuleArguments": [
+        {
+          "argType": 1,
+          "exception": true,
+          "filterPolicyName": "FilterOne"
+        },
+        {
+          "argType": 2,
+          "exception": false,
+          "scheduleName": "anytime"
+        },
+        {
+          "argType": 3,
+          "exception": false,
+          "authGroupName": "default"
+        }
+      ]
+    }
+  ],
+  "httpsRules": [
+    {
+      "name": "SecRule1",
+      "enabled": false,
+      "seqNumber": 1,
+      "httpsRuleFilter": {
+        "httpsFilterName": "HTTPSFilterOne",
+        "isHttpsFilterException": false
+      },
+      "httpsRuleGroups": [
+        {
+          "httpsRuleGroupName": "default",
+          "isGroupException": false
+        }
+      ]
+    }
+  ],
+  "httpsFilters": [
+    {
+      "name": "default",
+      "createDate": "2014-11-10T00:00:00.000Z",
+      "avcInspectionEnabled": false,
+      "domains": [],
+      "excludedNetworks": [],
+      "includedNetworks": [],
+      "categories": [],
+      "exceptions": []
+    },
+    {
+      "name": "HTTPSFilterOne",
+      "createDate": "2014-11-11T00:00:00.000Z",
+      "avcInspectionEnabled": true,
+      "domains": [
+        {
+          "url": "joinme.com"
+        },
+        {
+          "url": "webex.com"
+        }
+      ],
+      "excludedNetworks": [
+        {
+          "network": "63.123.254.10/32"
+        }
+      ],
+      "includedNetworks": [
+        {
+          "network": "63.123.254.55/32"
+        },
+        {
+          "network": "63.123.254.60/32"
+        }
+      ],
+      "categories": [],
+      "exceptions": [
+        {
+          "exception": "securview.webex.com"
+        }
+      ]
+    }
+  ],
+  "expressionLists": [],
+  "backupDateTime": "2014-11-11T11:47:47.765Z"
+}
