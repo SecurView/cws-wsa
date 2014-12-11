@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/tx
+     http://www.springframework.org/schema/tx/spring-tx.xsd
+     http://www.springframework.org/schema/aop 
+     http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="org.postgresql.Driver" />
+		<property name="jdbcUrl" value="jdbc:postgresql://cipl1server2008:5432/WSAMigration" />
+		<property name="user" value="postgres" />
+		<property name="password" value="pass@123" />
+	</bean>
+	
+	
+	<!-- Sizing Service Beans  -->
+	
+	<bean id="ApplianceDAOImpl" class="com.securview.fwmng.wsamigration.appserver.dao.ApplianceDAOImpl">
+		<constructor-arg name="dataSource" ref="dataSource"></constructor-arg>
+	</bean>
+
+	<bean id="ApplicationDAOImpl" class="com.securview.fwmng.wsamigration.appserver.dao.ApplicationDAOImpl">
+		<constructor-arg name="dataSource" ref="dataSource"></constructor-arg>
+	</bean>
+	
+	<bean id="URLCategoryDAOImpl" class="com.securview.fwmng.wsamigration.appserver.dao.URLCategoryDAOImpl">
+		<constructor-arg name="dataSource" ref="dataSource"> </constructor-arg>
+	</bean>
+		
+	<bean id="VendorDAOImpl" class="com.securview.fwmng.wsamigration.appserver.dao.VendorDAOImpl">
+		<constructor-arg name="dataSource" ref="dataSource"> </constructor-arg>
+	</bean>
+	
+	<bean id="VendorSoftwareDAOImpl" class="com.securview.fwmng.wsamigration.appserver.dao.VendorSoftwareDAOImpl">
+		<constructor-arg name="dataSource" ref="dataSource"> </constructor-arg>
+	</bean>
+	<bean id="WSAMigrator" class="com.securview.fwmng.wsamigration.appserver.service.migrator.WSAMigrator">
+     <property name="applicationDAO" ref="ApplicationDAOImpl"></property>
+     <property name="urlCategoryDAO" ref="URLCategoryDAOImpl"></property>
+
+	</bean>
+	<bean id="WSAMigrationServiceImpl" class="com.securview.fwmng.wsamigration.appserver.service.WSAMigrationServiceImpl">
+     <property name="wsaMigrator" ref="WSAMigrator"></property>
+     <property name="vendorDAO" ref="VendorDAOImpl"></property>
+     <property name="applianceDAO" ref="ApplianceDAOImpl"></property>
+     <property name="vendorSoftwareDAO" ref="VendorSoftwareDAOImpl"></property>
+   
+
+	</bean>
+			
+	<bean id="WSAMigrationServiceProxy" class="com.securview.fwmng.wsamigration.appserver.service.WSAMigrationServiceProxy">
+		<property name="migrationServiceImpl" ref="WSAMigrationServiceImpl"></property>
+	</bean>
+
+</beans> 
