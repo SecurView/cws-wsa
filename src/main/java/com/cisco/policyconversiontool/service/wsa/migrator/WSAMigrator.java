@@ -30,6 +30,7 @@ import com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclPolicyGroups;
 import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSAMigratedConfig;
 import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSATimeDefinition;
 import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSATimeRange;
+import com.cisco.policyconversiontool.service.util.Constants;
 import com.cisco.policyconversiontool.service.util.DTDEntityResolver;
 import com.cisco.policyconversiontool.service.util.DTDProvider;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -67,43 +68,52 @@ public class WSAMigrator
 		WSAMigratedConfig objWSAMigratedConfig = new WSAMigratedConfig();
 		
 		Map<String,Boolean> usedUnusedFilterPolicy = getUsedUnusedFilterPolicy(objCWSPolicy);
-		List<FilterPolicy> unusedFilterPolicy = getUnusedHttpFilters(objCWSPolicy,usedUnusedFilterPolicy);
+		logUnusedHttpFilters(usedUnusedFilterPolicy);
+		
+		
+		
+		
 		
 		
 		return objWSAMigratedConfig;
 	}
-	
-	public List<FilterPolicy> getUnusedHttpFilters(CWSPolicy objCWSPolicy,Map<String,Boolean> usedUnusedFilterPolicy)
+	 
+	public void logUnusedHttpFilters(Map<String,Boolean> usedUnusedFilterPolicy)
 	{
-		List<FilterPolicy> unusedFilterPolicyList = new ArrayList<FilterPolicy>();
-		List<FilterPolicy> filterPolicyList = objCWSPolicy.getFilterPolicies();
-		for(int filterPolicyIndex = 0; filterPolicyIndex < filterPolicyList.size(); filterPolicyIndex++)
-		{
-			FilterPolicy objFilterPolicy = filterPolicyList.get(filterPolicyIndex);
-			String filterPolicyName = objFilterPolicy.getName();
-			if(!usedUnusedFilterPolicy.get(filterPolicyName))
-			{
-				// if false....then add to list..
-				unusedFilterPolicyList.add(objFilterPolicy);
-			}
-		}
-		return unusedFilterPolicyList;
+		String unusedFilters = "";
+		// iterate HashMap if value of filter Name gets false it is unused filter there should be entry in review file...
+		 for(String filterName : usedUnusedFilterPolicy.keySet())
+		 {
+			 if(!usedUnusedFilterPolicy.get(filterName))
+			 {
+				 unusedFilters += Constants.NEW_LINE+filterName;
+			 }
+		 }
+		 // if there are unused http filter then there should be header..
+		 if(unusedFilters.length() > 0)
+		 {
+			 reviewBuffer.append(Constants.NEW_LINE+"********************************** Unused Filter Policy *****************************");
+			 reviewBuffer.append(Constants.NEW_LINE + unusedFilters);
+		 }
 	}
 	public Map<String,Boolean> getUsedUnusedFilterPolicy(CWSPolicy objCWSPolicy)
 	{
 		Map<String,Boolean> usedUnusedFilterPolicy = new HashMap<String,Boolean>();
 		
 		List<FilterPolicy> filterPolicyList = objCWSPolicy.getFilterPolicies();
+		// put all filter policy into hash map and mark them as unused..
 		for(int filterPolicyIndex=0; filterPolicyIndex < filterPolicyList.size(); filterPolicyIndex++)
 		{
 			usedUnusedFilterPolicy.put(filterPolicyList.get(filterPolicyIndex).getName(), false);
 		}
 		// iterate over advRules
+		// occurrence of filterName in advRule will considered as used HTTP Filter. so it will be mark as used in hashmap.
 		List<AdvRule> advRuleList = objCWSPolicy.getAdvRules();
 		for(int advRuleIndex = 0; advRuleIndex < advRuleList.size(); advRuleIndex++)
 		{
 			AdvRule objAdvRule = advRuleList.get(advRuleIndex);
 			List<AdvRuleArgument> advRuleArgumentList = objAdvRule.getAdvRuleArguments();
+			// in list of advRuleArgument there will one such object where filterPolicyname will not null..
 			for(int advRuleArgumentIndex = 0 ; advRuleArgumentIndex < advRuleArgumentList.size(); advRuleArgumentIndex++)
 			{
 				AdvRuleArgument objAdvRuleArgument = advRuleArgumentList.get(advRuleArgumentIndex);
