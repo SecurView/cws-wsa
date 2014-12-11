@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/beans 
+     http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/tx
+     http://www.springframework.org/schema/tx/spring-tx.xsd
+     http://www.springframework.org/schema/aop 
+     http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+<bean id="dataSource"
+        class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="org.h2.Driver" />
+        <property name="url" value="jdbc:h2:~/test" />
+        <property name="username" value="sa" />
+        <property name="password" value="" />
+</bean>
+	<!-- Policy Conversion Service Beans  -->
+	
+	<bean id="ApplianceDAOImpl" class="com.cisco.policyconversiontool.dao.ApplianceDAOImpl">
+		<constructor-arg name="dataSource" ref="dataSource"></constructor-arg>
+	</bean>
+
+	<bean id="ApplicationDAOImpl" class="com.cisco.policyconversiontool.dao.ApplicationDAOImpl">
+		<constructor-arg name="dataSource" ref="dataSource"></constructor-arg>
+	</bean>
+	
+	<bean id="URLCategoryDAOImpl" class="com.cisco.policyconversiontool.dao.URLCategoryDAOImpl">
+		<constructor-arg name="dataSource" ref="dataSource"> </constructor-arg>
+	</bean>
+		
+	<bean id="VendorDAOImpl" class="com.cisco.policyconversiontool.dao.VendorDAOImpl">
+		<constructor-arg name="dataSource" ref="dataSource"> </constructor-arg>
+	</bean>
+	
+	<bean id="VendorSoftwareDAOImpl" class="com.cisco.policyconversiontool.dao.VendorSoftwareDAOImpl">
+		<constructor-arg name="dataSource" ref="dataSource"> </constructor-arg>
+	</bean>
+	<bean id="WSAMigrator" class="com.cisco.policyconversiontool.service.wsa.migrator.WSAMigrator">
+     <property name="applicationDAO" ref="ApplicationDAOImpl"></property>
+     <property name="urlCategoryDAO" ref="URLCategoryDAOImpl"></property>
+
+	</bean>
+	<bean id="PolicyConversionToolServiceImpl" class="com.cisco.policyconversiontool.service.PolicyConversionToolServiceImpl">
+     <property name="wsaMigrator" ref="WSAMigrator"></property>
+     <property name="vendorDAO" ref="VendorDAOImpl"></property>
+     <property name="applianceDAO" ref="ApplianceDAOImpl"></property>
+     <property name="vendorSoftwareDAO" ref="VendorSoftwareDAOImpl"></property>
+	</bean>
+</beans> 
