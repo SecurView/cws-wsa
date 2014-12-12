@@ -1,5 +1,6 @@
 package com.cisco.policyconversiontool.service.wsa.migrator;
  
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -21,15 +22,21 @@ import com.cisco.policyconversiontool.dao.URLCategoryDAO;
 import com.cisco.policyconversiontool.dto.WSAMigrationParameters;
 import com.cisco.policyconversiontool.dto.cws.AdvRule;
 import com.cisco.policyconversiontool.dto.cws.AdvRuleArgument;
+import com.cisco.policyconversiontool.dto.cws.AuthGroup;
 import com.cisco.policyconversiontool.dto.cws.CWSPolicy;
 import com.cisco.policyconversiontool.dto.cws.FilterPolicy;
+import com.cisco.policyconversiontool.dto.cws.IpExpression;
 import com.cisco.policyconversiontool.dto.cws.Schedule;
+import com.cisco.policyconversiontool.dto.cws.User;
 import com.cisco.policyconversiontool.dto.wsa.asyncos805.Config;
 import com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclGroup;
 import com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclPolicyGroups;
+import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSAIdentity;
 import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSAMigratedConfig;
+import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSAPolicy;
 import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSATimeDefinition;
 import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSATimeRange;
+import com.cisco.policyconversiontool.service.cws.parsar.CWSParser;
 import com.cisco.policyconversiontool.service.util.Constants;
 import com.cisco.policyconversiontool.service.util.DTDEntityResolver;
 import com.cisco.policyconversiontool.service.util.DTDProvider;
@@ -45,8 +52,6 @@ public class WSAMigrator
 	private URLCategoryDAO urlCategoryDAO;
 	private ApplicationDAO applicationDAO;
 	
-	public StringBuffer reviewBuffer = new StringBuffer();
-
 	public URLCategoryDAO getUrlCategoryDAO() {
 		return urlCategoryDAO;
 	}
@@ -65,20 +70,131 @@ public class WSAMigrator
 
 	public WSAMigratedConfig generateWSAPolicyConfig(CWSPolicy objCWSPolicy, WSAMigrationParameters wsaMigrationParameters) throws Exception 
 	{
+		StringBuffer reviewBuffer = new StringBuffer();
 		WSAMigratedConfig objWSAMigratedConfig = new WSAMigratedConfig();
 		
 		Map<String,Boolean> usedUnusedFilterPolicy = getUsedUnusedFilterPolicy(objCWSPolicy);
-		logUnusedHttpFilters(usedUnusedFilterPolicy);
+		logUnusedHttpFilters(usedUnusedFilterPolicy,reviewBuffer);
 		
-		
+		List<WSATimeDefinition> wsaTimeDefinitionList = convertScheduleToWSATimeRanges(objCWSPolicy.getSchedules());
+		List<WSAIdentity> wsaIdentityList = null ;
+		List<WSAPolicy> wsaPolicyList= getWSAPolicies(objCWSPolicy.getAdvRules(),wsaIdentityList,wsaTimeDefinitionList,reviewBuffer);
 		
 		
 		
 		
 		return objWSAMigratedConfig;
 	}
-	 
-	public void logUnusedHttpFilters(Map<String,Boolean> usedUnusedFilterPolicy)
+	private List<WSAPolicy> getWSAPolicies(List<AdvRule> advRulesList,List<WSAIdentity> wsaIdentityList,List<WSATimeDefinition> wsaTimeDefinitionList,StringBuffer reviewBuffer)
+	{
+		List<WSAPolicy> wsaPolicyList = new ArrayList<WSAPolicy>();
+		String scenarioFirst[] = {"N.A","N.A","Monitor","Monitor","Monitor","Monitor","Block","Monitor"};
+		String scenarioSecond[] = {"N.A","N.A","Block","Block","Block","Block","Monitor","Block"};
+		String scenarioThird[] = {"N.A","N.A","Warn","Warn","Warn","Warn","Block","Warn"};
+		String scenarioFourth[] =  {"N.A","N.A","Block","Block","Block","Block","Warn","Block"};
+		String scenario[] = null;
+		StringBuffer reviewBufferLocal = new StringBuffer();
+		for(AdvRule objAdvRule : advRulesList)
+		{
+			 String ruleName = objAdvRule.getName();
+			 String ruleDescription = objAdvRule.getDescription();
+			 long ruleAction = objAdvRule.getAdvAction();
+			 List<Integer> filterPolicyIndexList = new ArrayList<Integer>();
+			 List<Integer> scheduleIndexList = new ArrayList<Integer>();
+			 List<Integer> authGroupIndexList = new ArrayList<Integer>();
+			 
+			 List<AdvRuleArgument> advRuleArgumentsList = objAdvRule.getAdvRuleArguments();
+			 for( int advRuleArgumentsIndex = 0 ; advRuleArgumentsIndex < advRuleArgumentsList.size(); advRuleArgumentsIndex++)
+			 {
+				 AdvRuleArgument objAdvRuleArgument = advRuleArgumentsList.get(advRuleArgumentsIndex);
+				 if(objAdvRuleArgument.getArgType()==Constants.ARGTYPE_FILTER_POLICY_NAME)
+				 {
+					 if(objAdvRuleArgument.isException())
+					 {
+						// log filter Policy to review file.....
+						 reviewBufferLocal.append(Constants.NEW_LINE+objAdvRuleArgument.getFilterPolicyName());
+					 }else
+					 {
+						 filterPolicyIndexList.add(advRuleArgumentsIndex);
+					 }
+				 }else if(objAdvRuleArgument.getArgType()==Constants.ARGTYPE_SCHEDULE_NAME)
+				 {
+					 scheduleIndexList.add(advRuleArgumentsIndex);
+				 }else if(objAdvRuleArgument.getArgType()==Constants.ARGTYPE_AUTHGROUP_NAME)
+				 {
+					 authGroupIndexList.add(advRuleArgumentsIndex);
+				 }
+			 }
+			 
+			 // iterate over authGroup
+			 for(int authGroupIndex : authGroupIndexList)
+			 {
+				 String authGroupName = advRuleArgumentsList.get(authGroupIndex).getAuthGroupName();
+				 boolean isAuthGroupException = advRuleArgumentsList.get(authGroupIndex).isException();
+				 
+				 //iterate over schedules
+				 for(int schedulesIndex : scheduleIndexList)
+				 {
+					 String scheduleName = advRuleArgumentsList.get(schedulesIndex).getScheduleName();
+					 boolean isScheduleException = advRuleArgumentsList.get(authGroupIndex).isException();
+					 //iterate Over filterPolicy
+					 for(int filterPolicyIndex : filterPolicyIndexList)
+					 {
+						 String filterPolicyName = advRuleArgumentsList.get(filterPolicyIndex).getFilterPolicyName();
+						
+						 if(isAuthGroupException)
+						 {
+							 if(ruleAction==Constants.ADV_RULE_ACTION_ALLOW)
+							 {
+								 scenario = scenarioSecond;
+							 }else if(ruleAction==Constants.ADV_RULE_ACTION_BLOCK)
+							 {
+								 scenario = scenarioFirst;
+							 } else if(ruleAction==Constants.ADV_RULE_ACTION_WARN)
+							 {
+								 scenario = scenarioFourth;
+							 }
+						 }else
+						 {
+							 if(ruleAction==Constants.ADV_RULE_ACTION_ALLOW)
+							 {
+								 scenario = scenarioFirst;
+							 }else if(ruleAction==Constants.ADV_RULE_ACTION_BLOCK)
+							 {
+								 scenario = scenarioSecond;
+							 } else if(ruleAction==Constants.ADV_RULE_ACTION_WARN)
+							 {
+								 scenario = scenarioThird;
+							 }
+						 }
+						 
+						 wsaPolicyList.add(createWSAPolicy(ruleName,ruleDescription,authGroupName,scheduleName,isScheduleException,filterPolicyName,scenario,wsaIdentityList,wsaTimeDefinitionList));
+					 }
+				 }
+			 }
+		}
+		
+		if(reviewBufferLocal.length() > 0)
+		{
+			reviewBuffer.append(Constants.NEW_LINE+"!******************************* Exception Filter Policy ***************************!");
+			reviewBuffer.append(reviewBufferLocal);
+		}
+		return wsaPolicyList;
+	}
+
+	public WSAPolicy createWSAPolicy(String ruleName,String ruleDescription,String authGroupName,String scheduleName,boolean isScheduleException,String filterPolicyName,String [] scenario, List<WSAIdentity> wsaIdentityList, List<WSATimeDefinition> wsaTimeDefinitionList)
+	{
+		WSAPolicy objWSAPolicy = new WSAPolicy();
+		 String wsaPolicyName = (ruleName+Constants.POLICY_NAME_SEPRATOR+authGroupName+Constants.POLICY_NAME_SEPRATOR+scheduleName+Constants.POLICY_NAME_SEPRATOR+filterPolicyName).replace("/", "").replace(":", "").replace(" ", "");
+		 System.out.println(wsaPolicyName);
+		 objWSAPolicy.setName(wsaPolicyName);
+		 objWSAPolicy.setDescription((ruleDescription==null?"":ruleDescription)+".Description");
+		 
+		 
+		 
+		return objWSAPolicy;
+	}
+	public void logUnusedHttpFilters(Map<String,Boolean> usedUnusedFilterPolicy, StringBuffer reviewBuffer)
 	{
 		String unusedFilters = "";
 		// iterate HashMap if value of filter Name gets false it is unused filter there should be entry in review file...
@@ -126,11 +242,11 @@ public class WSAMigrator
 		}
 		return usedUnusedFilterPolicy;
 	}
-	public List<WSATimeDefinition> convertSchedultToWSATimeRanges(List<Schedule> scheduleList)
+	public List<WSATimeDefinition> convertScheduleToWSATimeRanges(List<Schedule> scheduleList)
 	{
 		List<WSATimeDefinition> wsaTimeDefinitionList = new ArrayList<WSATimeDefinition>();
 		Schedule objSchedule = null;
-		String weekday[] = { "SUN" , "MON" , "TUE" , "WED" , "THU" , "FRI" , "SAT" };
+		String weekday[] = { Constants.SUNDAY , Constants.MONDAY , Constants.TUESDAY , Constants.WEDNESDAY , Constants.THURSDAY , Constants.FRIDAY , Constants.SATURDAY };
 		
 		for(int schedulIndex = 0; schedulIndex < scheduleList.size(); schedulIndex++)
 		{
@@ -159,13 +275,18 @@ public class WSAMigrator
 		}
 		return wsaTimeDefinitionList;
 	}
-	public CWSPolicy readCWSConfiguration(InputStream cwsConfigStream) throws JsonParseException, JsonMappingException, IOException {
-		// TODO Auto-generated method stub
-		ObjectMapper mapper = new ObjectMapper();
-		CWSPolicy cwsPolicy = mapper.readValue(cwsConfigStream, CWSPolicy.class);
-		return cwsPolicy;
+	
+	public WSATimeDefinition getTimeDefinitionFromList(String timeDefinitionName,List<WSATimeDefinition> wsaTimeDefinitionList)
+	{
+		for(WSATimeDefinition objWSATimeDefinition : wsaTimeDefinitionList)
+		{
+			if(timeDefinitionName.equals(objWSATimeDefinition.getName()))
+				return objWSATimeDefinition;
+		}
+		return null;
 	}
-
+	
+	 
 	public Config readWSAConfiguration(InputStream wsaInitialConfig) throws Exception  
 	{
 		Config objConfig = null;
@@ -213,5 +334,10 @@ public class WSAMigrator
 			}
 		}
 		return false;
+	}
+	public static void main(String arg[]) throws Exception
+	{
+		WSAMigrator objWSAMigrator = new WSAMigrator();
+		objWSAMigrator.generateWSAPolicyConfig((new CWSParser()).doParsing(new FileInputStream("src/test/resource/fixtures/cws/SecurView_6_CiscoFixes.json")),null);
 	}
 }
