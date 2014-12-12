@@ -9,6 +9,7 @@ import com.cisco.policyconversiontool.service.util.Constants;
 
 public class WSAPolicy implements Serializable , Comparator<WSAPolicy>, Comparable<WSAPolicy>{
 	private String name;
+	private String description;
 	private WSAIdentity identity;
 	private WSATimeDefinition timeDefinition;
 	private String clientType;
@@ -132,5 +133,11 @@ public class WSAPolicy implements Serializable , Comparator<WSAPolicy>, Comparab
 	private int unsignedByteToInt(byte b) {
         return (int) b & 0xFF;
     }
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
 		
 }
