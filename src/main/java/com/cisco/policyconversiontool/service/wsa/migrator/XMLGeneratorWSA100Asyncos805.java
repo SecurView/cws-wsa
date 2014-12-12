@@ -627,19 +627,19 @@ public class XMLGeneratorWSA100Asyncos805 implements ApplianceXMLGenerator{
 									for(int validDaysIndex=0; validDaysIndex < validDaysList.size(); validDaysIndex++)
 									{
 										day = validDaysList.get(validDaysIndex);
-										if(day.equalsIgnoreCase(Constants.NORMALIZED_DAY_SATURDAY)) {
+										if(day.equalsIgnoreCase(Constants.SATURDAY)) {
 											validDaysString += "A";
-										}else if(day.equalsIgnoreCase(Constants.NORMALIZED_DAY_FRIDAY)) {
+										}else if(day.equalsIgnoreCase(Constants.FRIDAY)) {
 											validDaysString += "F";
-										}else if(day.equalsIgnoreCase(Constants.NORMALIZED_DAY_THURSDAY)) {
+										}else if(day.equalsIgnoreCase(Constants.THURSDAY)) {
 											validDaysString += "H";
-										}else if(day.equalsIgnoreCase(Constants.NORMALIZED_DAY_MONDAY)) {
+										}else if(day.equalsIgnoreCase(Constants.MONDAY)) {
 											validDaysString += "M";
-										}else  if(day.equalsIgnoreCase(Constants.NORMALIZED_DAY_SUNDAY)) {
+										}else  if(day.equalsIgnoreCase(Constants.SUNDAY)) {
 											validDaysString += "S";
-										}else  if(day.equalsIgnoreCase(Constants.NORMALIZED_DAY_TUESDAY)) {
+										}else  if(day.equalsIgnoreCase(Constants.TUESDAY)) {
 											validDaysString += "T";
-										}else  if(day.equalsIgnoreCase(Constants.NORMALIZED_DAY_WEDNESDAY)) {
+										}else  if(day.equalsIgnoreCase(Constants.WEDNESDAY)) {
 											validDaysString += "W";
 										}
 									}
