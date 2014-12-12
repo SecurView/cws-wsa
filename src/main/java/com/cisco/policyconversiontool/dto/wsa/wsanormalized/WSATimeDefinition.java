@@ -8,6 +8,7 @@ public class WSATimeDefinition  implements Serializable{
 	private String name;
 	private List<WSATimeRange> timeRangeList;
 	private String timeZone;
+	private boolean exception;
 	public String getName() {
 		return name;
 	}
@@ -25,6 +26,12 @@ public class WSATimeDefinition  implements Serializable{
 	}
 	public void setTimeZone(String timeZone) {
 		this.timeZone = timeZone;
+	}
+	public boolean isException() {
+		return exception;
+	}
+	public void setException(boolean exception) {
+		this.exception = exception;
 	}
 	
 }
