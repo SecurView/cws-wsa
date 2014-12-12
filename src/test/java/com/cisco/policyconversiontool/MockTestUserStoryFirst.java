@@ -78,30 +78,6 @@ public class MockTestUserStoryFirst {
 		   Config objConfig = objWSAMigrator.readWSAConfiguration(wsaInitialConfig);
 //		   assertThat(objConfig,IsNull.notNullValue());
 	   }
-	   /**
-	    * Test case created to validate behavior for correct ( well formed) CWS configuration.
-	    * @throws JsonParseException
-	    * @throws JsonMappingException
-	    * @throws IOException
-	    */
-	   @Test
-	   public void acceptanceCriteria1_testCase3() throws JsonParseException, JsonMappingException, IOException {
-		   InputStream cwsConfig = getInputStreams(CWS_CONFIG_WF);
-		   CWSPolicy objCWSPolicy = objWSAMigrator.readCWSConfiguration(cwsConfig);
-		   assertNotNull(objCWSPolicy);
-	   }
-	   
-	   /**
-	    * Test case created to validate behavior for incorrect (not well formed) WSA configuration.
-	    * @throws JsonParseException
-	    * @throws JsonMappingException
-	    * @throws IOException
-	    */
-	   @Test(expected = JsonParseException.class)
-	   public void acceptanceCriteria1_testCase4() throws JsonParseException, JsonMappingException, IOException {
-		   InputStream cwsConfig = getInputStreams(CWS_CONFIG_NWF);
-		   CWSPolicy objCWSPolicy = objWSAMigrator.readCWSConfiguration(cwsConfig);
-	   }
 	   
 	   /**
 	    * Test case created to validate behavior If web reputation is not enabled in default policy.
