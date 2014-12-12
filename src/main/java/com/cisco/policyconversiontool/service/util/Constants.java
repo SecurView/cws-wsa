@@ -51,18 +51,25 @@ public class Constants
 	
 	 
 	
-	public final static String NORMALIZED_DAY_MONDAY = "mon";
-	public final static String NORMALIZED_DAY_TUESDAY = "tue";
-	public final static String NORMALIZED_DAY_WEDNESDAY = "wed";
-	public final static String NORMALIZED_DAY_THURSDAY = "thu";
-	public final static String NORMALIZED_DAY_FRIDAY = "fri";
-	public final static String NORMALIZED_DAY_SATURDAY = "sat";
-	public final static String NORMALIZED_DAY_SUNDAY = "sun";
+	public final static String MONDAY = "mon";
+	public final static String TUESDAY = "tue";
+	public final static String WEDNESDAY = "wed";
+	public final static String THURSDAY = "thu";
+	public final static String FRIDAY = "fri";
+	public final static String SATURDAY = "sat";
+	public final static String SUNDAY = "sun";
 	
+	public final static long ARGTYPE_FILTER_POLICY_NAME = 1L;
+	public final static long ARGTYPE_SCHEDULE_NAME = 2L;
+	public final static long ARGTYPE_AUTHGROUP_NAME = 3L;
+	
+	public final static String POLICY_NAME_SEPRATOR = "_____";
 	
 	public final static String TRUE = "true";
 	
-	    
+	public final static long ADV_RULE_ACTION_ALLOW = 1L;
+	public final static long ADV_RULE_ACTION_WARN = 2L;
+	public final static long ADV_RULE_ACTION_BLOCK = 1L;
 	
 	public static final String WSA_REALM_IDENTITY = "realm";
 	public static final String APPLIENCE_ID_CWS = "4";
