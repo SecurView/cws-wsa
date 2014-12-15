@@ -52,8 +52,6 @@ public class AppController {
 		outStream.write(out.toByteArray());
 		out.close();
 		outStream.close();
-		
-		
 		 
 		logger.info("***********************************");
 		logger.info("Started Log Analysing Tool");
