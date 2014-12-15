@@ -1259,6 +1259,9 @@
 		   ],
 		   "ipExpressions":
 		   [
+		   		{
+				   "expression": "10.20.220.12/24"
+			   }
 		   ]
 	   },
 	   {
@@ -1460,7 +1463,7 @@
 			   {
 				   "argType": 3,
 				   "exception": false,
-				   "authGroupName": "default"
+				   "authGroupName": "engineering"
 			   }
 		   ]
 	   },
@@ -1538,7 +1541,7 @@
 			   {
 				   "argType": 3,
 				   "exception": false,
-				   "authGroupName": "default"
+				   "authGroupName": "TestCustomGroup"
 			   }
 		   ]
 	   }
