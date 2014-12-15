@@ -25,8 +25,12 @@ import com.cisco.policyconversiontool.util.TestUtil;
 
 public class MockTestClassSecond {
 
-	private final String CWS_CONFIG_FILE_PATH = "cws/SecurView_6_CiscoFixes.json";  // WSA intital Configuartion xml file name which is well formed...
-
+	/**
+	 * Class is written for the validate following user story.
+	 * US002-Conversion of CWS Schedules.
+	 * US004-Conversion of CWS Policy with Unused HTTP filters
+	 */
+	
 	WSAMigrator objWSAMigrator ;
 	 
 	 @Before
@@ -38,7 +42,7 @@ public class MockTestClassSecond {
 	 @Rule public ExpectedException thrown = ExpectedException.none();
 	 /**
 	  * Test case created to validate Converted Schedules to WSATimeDefinition.
-	 * @throws Exception 
+	  * @throws Exception 
 	  */
 	 	@Test
 	   public void convertSchduleToTimeDefinition_testCase1() throws Exception {
@@ -53,23 +57,20 @@ public class MockTestClassSecond {
 	 	
  	 /**
 	  * Test case created to validate list of unused http filter from the funtion getUnusedHttpFilters.
-	 * @throws Exception 
+	  * @throws Exception 
 	  */
 	 	@Test
 	   public void getUnusedHttpFilters_testCase1() throws Exception {
 	 		
-	 		CWSPolicy objCWSPolicy = TestUtil.getCWSPolicyConfig(CWS_CONFIG_FILE_PATH);
+	 		CWSPolicy objCWSPolicy = TestUtil.getCWSPolicyConfig(TestUtil.CWS_CONFIG_FILE_PATH_US004);
 	 		
-	 		Map<String,Boolean> usedUnusedFilterPolicy = objWSAMigrator.getUsedUnusedFilterPolicy(objCWSPolicy);
-	 		assertTrue(usedUnusedFilterPolicy.get("default").equals(false));
-	 		assertTrue(usedUnusedFilterPolicy.get("unused").equals(false));
-	 		assertTrue(usedUnusedFilterPolicy.get("FilterOne").equals(true));
+	 		StringBuffer objReviewBuffer = new StringBuffer();
 	 		
-//	 		objWSAMigrator.logUnusedHttpFilters(usedUnusedFilterPolicy);
-//			String reviewBuffer = objWSAMigrator.reviewBuffer.toString();
-//			assertTrue(reviewBuffer.contains("Unused Filter Policy"));
-//			assertTrue(reviewBuffer.contains("unused"));
-//			assertTrue(reviewBuffer.contains("default"));
+	 		objWSAMigrator.logUnusedHttpFilters(objCWSPolicy,objReviewBuffer);
+			String reviewBuffer = objReviewBuffer.toString();
+			assertTrue(reviewBuffer.contains("Unused Filter Policy"));
+			assertTrue(reviewBuffer.contains("unused"));
+			assertTrue(reviewBuffer.contains("default"));
 	   }
 	   
 	   public static void main(String[] args) {

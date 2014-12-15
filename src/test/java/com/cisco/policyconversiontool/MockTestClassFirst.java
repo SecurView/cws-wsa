@@ -1,25 +1,15 @@
 package com.cisco.policyconversiontool;
 
  
- 
-
- 
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,119 +17,155 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
-
-import com.cisco.policyconversiontool.dto.cws.CWSPolicy;
-import com.cisco.policyconversiontool.dto.wsa.asyncos805.Config;
-import com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclGroup;
-import com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclPolicyGroups;
-import com.cisco.policyconversiontool.dto.wsa.asyncos805.WgaConfig;
-import com.cisco.policyconversiontool.service.wsa.migrator.WSAMigrator;
+import com.cisco.policyconversiontool.service.PolicyConversionToolServiceImpl;
 import com.cisco.policyconversiontool.util.TestUtil;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
  
 public class MockTestClassFirst {
+	/**
+	 * Class is written for the validate following user story.
+	 * US001-Validating the WSA initial configuration
+	 */
 
-	WSAMigrator objWSAMigrator ;
-	 
-	 @BeforeClass
+	PolicyConversionToolServiceImpl objPolicyConversionToolServiceImpl;
+	 @org.junit.Before
 	   public void Before() throws Exception
 	   {
-		  objWSAMigrator = new WSAMigrator();
+		 TestUtil.policyConversionToolInitialSetup();
+		 objPolicyConversionToolServiceImpl = new PolicyConversionToolServiceImpl();
 	   }
 	 
 	 @Rule public ExpectedException thrown = ExpectedException.none();
 	 /**
+	 	 * Test case created to validate behavior for correct ( well formed) WSA configuration.
+	 	 * For asyncos : 805
+	 	 * @throws Exception 
+	 	 */
+	   @Test
+	   public void acceptanceCriteria1_testCase1() throws Exception {
+		   InputStream wsaInitialConfig = TestUtil.getInputStreams(TestUtil.WSA_INIT_CONFIG_WF);
+		   com.cisco.policyconversiontool.dto.wsa.asyncos805.Config objConfig = (com.cisco.policyconversiontool.dto.wsa.asyncos805.Config) objPolicyConversionToolServiceImpl.readWSAConfiguration(wsaInitialConfig,"1");
+		   assertNotNull(objConfig);
+	   }
+	   
+	 /**
 	  * Test case created to validate behavior for incorrect (not well formed) WSA configuration.
+	  * For asyncos : 805
 	 * @throws Exception 
 	  */
 	 	@Test
 	   public void acceptanceCriteria1_testCase2() throws Exception {
 	 		thrown.expect(Exception.class);
 	 		thrown.expectMessage("initial WSA configuration");
-		   InputStream wsaInitialConfig = getInputStreams(TestUtil.WSA_INIT_CONFIG_NWF);
-//		   objWSAMigrator.readWSAConfiguration(wsaInitialConfig);
+		   InputStream wsaInitialConfig = TestUtil.getInputStreams(TestUtil.WSA_INIT_CONFIG_NWF);
+		   objPolicyConversionToolServiceImpl.readWSAConfiguration(wsaInitialConfig,"1");
 	   }
 	 	/**
 	 	 * Test case created to validate behavior for correct ( well formed) WSA configuration.
+	 	 * For asyncos : 806
 	 	 * @throws Exception 
 	 	 */
 	   @Test
-	   public void acceptanceCriteria1_testCase1() throws Exception {
-		   InputStream wsaInitialConfig = getInputStreams(TestUtil.WSA_INIT_CONFIG_WF);
-//		   Config objConfig = objWSAMigrator.readWSAConfiguration(wsaInitialConfig);
-//		   assertThat(objConfig,IsNull.notNullValue());
+	   public void acceptanceCriteria1_testCase3() throws Exception {
+		   InputStream wsaInitialConfig = TestUtil.getInputStreams(TestUtil.WSA_INIT_CONFIG_WF);
+		   com.cisco.policyconversiontool.dto.wsa.asyncos806.Config objConfig = (com.cisco.policyconversiontool.dto.wsa.asyncos806.Config) objPolicyConversionToolServiceImpl.readWSAConfiguration(wsaInitialConfig,"2");
+		   assertNotNull(objConfig);
 	   }
 	   
+	 /**
+	  * Test case created to validate behavior for incorrect (not well formed) WSA configuration.
+	  * For asyncos : 806
+	 * @throws Exception 
+	  */
+	 	@Test
+	   public void acceptanceCriteria1_testCase4() throws Exception {
+	 		thrown.expect(Exception.class);
+	 		thrown.expectMessage("initial WSA configuration");
+		   InputStream wsaInitialConfig = TestUtil.getInputStreams(TestUtil.WSA_INIT_CONFIG_NWF);
+		   objPolicyConversionToolServiceImpl.readWSAConfiguration(wsaInitialConfig,"2");
+	   }
 	   /**
-	    * Test case created to validate behavior If web reputation is not enabled in default policy.
-	    * @throws JsonParseException
-	    * @throws JsonMappingException
-	    * @throws IOException
+	    * Test case created to validate behavior If web reputation is not enabled in default policy
+	    * For asyncos 805.
+	 * @throws Exception 
 	    */
 	  
 	   @Test 
-	   public void acceptanceCriteria1_testCase5() throws JsonParseException, JsonMappingException, IOException {
+	   public void acceptanceCriteria1_testCase5() throws Exception {
 		  
-		 
-//		   Config objConfig = getMockedConfig();
-//		   ProxAclGroup objProxAclGroup = objConfig.getWgaConfig().getProxAclPolicyGroups().getProxAclGroup().get(0);
-//		   
-//		   when(objProxAclGroup.getProxAclGroupWbrsEnabled()).thenReturn("yes");
-//		   assertTrue(objWSAMigrator.checkWebReputation(objConfig));
-//		   verify(objProxAclGroup,atLeastOnce()).getProxAclGroupWbrsEnabled();
-//		   
-//		   when(objProxAclGroup.getProxAclGroupWbrsEnabled()).thenReturn("no");
-//		   assertFalse(objWSAMigrator.checkWebReputation(objConfig));
-//		   verify(objProxAclGroup,times(2)).getProxAclGroupWbrsEnabled();
-//		   
-//		   when(objProxAclGroup.getProxAclGroupWbrsEnabled()).thenReturn("");
-//		   assertFalse(objWSAMigrator.checkWebReputation(objConfig));
-//		   verify(objProxAclGroup,times(3)).getProxAclGroupWbrsEnabled();
-//		   
-	   }
-	   /**
-	    * Test case created to validate behavior checkHttpsCertificates
-	    */
-	   @Test 
-	   public void acceptanceCriteria1_testCase6(){
+		   com.cisco.policyconversiontool.dto.wsa.asyncos805.Config objConfig = TestUtil.getMockedConfig805();
+		   com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclGroup objProxAclGroup = objConfig.getWgaConfig().getProxAclPolicyGroups().getProxAclGroup().get(0);
 		   
+		   when(objProxAclGroup.getProxAclGroupWbrsEnabled()).thenReturn("yes");
+		   assertTrue(objPolicyConversionToolServiceImpl.checkWebReputation(objConfig,"1"));
+		   verify(objProxAclGroup,atLeastOnce()).getProxAclGroupWbrsEnabled();
+		   
+		   when(objProxAclGroup.getProxAclGroupWbrsEnabled()).thenReturn("no");
+		   assertFalse(objPolicyConversionToolServiceImpl.checkWebReputation(objConfig,"1"));
+		   verify(objProxAclGroup,times(2)).getProxAclGroupWbrsEnabled();
+		   
+		   when(objProxAclGroup.getProxAclGroupWbrsEnabled()).thenReturn("");
+		   assertFalse(objPolicyConversionToolServiceImpl.checkWebReputation(objConfig,"1"));
+		   verify(objProxAclGroup,times(3)).getProxAclGroupWbrsEnabled();
 	   }
-	   
-	   
 	   /**
-	    * Test case created to validate behavior of checkWebReputation method Expected : exception
-	 * @throws Exception 
-	 * @throws FileNotFoundException 
+	    * Test case created to validate behavior If web reputation is not enabled in default policy
+	    * For asyncos 806.
+	    * @throws Exception 
 	    */
-//	   @Test
-//	   public void acceptanceCriteria1_testCase7() throws FileNotFoundException, Exception{
-//		   thrown.expect(Exception.class);
-//		   thrown.expectMessage("Web Reputation");
-//		   objWSAMigrator.userStroyFirst(getInputStreams(WSA_INIT_CONFIG_NEG_TEST), getInputStreams(CWS_CONFIG_WF));
-//	   }
-	   
+	  
+	   @Test 
+	   public void acceptanceCriteria1_testCase6() throws Exception {
+		  
+		   com.cisco.policyconversiontool.dto.wsa.asyncos806.Config objConfig = TestUtil.getMockedConfig806();
+		   com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclGroup objProxAclGroup = objConfig.getWgaConfig().getProxAclPolicyGroups().getProxAclGroup().get(0);
+		   
+		   when(objProxAclGroup.getProxAclGroupWbrsEnabled()).thenReturn("yes");
+		   assertTrue(objPolicyConversionToolServiceImpl.checkWebReputation(objConfig,"2"));
+		   verify(objProxAclGroup,atLeastOnce()).getProxAclGroupWbrsEnabled();
+		   
+		   when(objProxAclGroup.getProxAclGroupWbrsEnabled()).thenReturn("no");
+		   assertFalse(objPolicyConversionToolServiceImpl.checkWebReputation(objConfig,"2"));
+		   verify(objProxAclGroup,times(2)).getProxAclGroupWbrsEnabled();
+		   
+		   when(objProxAclGroup.getProxAclGroupWbrsEnabled()).thenReturn("");
+		   assertFalse(objPolicyConversionToolServiceImpl.checkWebReputation(objConfig,"2"));
+		   verify(objProxAclGroup,times(3)).getProxAclGroupWbrsEnabled();
+//		   
+	   }
 	   /**
-	    * Test case created to validate behavior of checkWebReputation method in no exception Expected ..
-	    * but expected exception in checkHttpsCertificate.
-	 * @throws Exception 
-	 * @throws FileNotFoundException 
+	    * Test case created to validate behavior of checkHttpsCertificate method.
+	    * For asyncos : 805
+		 * @throws Exception 
+		 * @throws FileNotFoundException 
 	    */
-	   
-//	   @Test
-//	   public void acceptanceCriteria1_testCase8() throws FileNotFoundException, Exception{
-//		   thrown.expect(Exception.class);
-//		   thrown.expectMessage("HTTPS certificate");
-//		   thrown.expectMessage(" WSA and CWS are ");
-////		   objWSAMigrator.userStroyFirst(getInputStreams(WSA_INIT_CONFIG_WF), getInputStreams(CWS_CONFIG_WF));
-//	   }
-	   
-	   
+	   @Test
+	   public void acceptanceCriteria1_testCase7() throws FileNotFoundException, Exception{
+		   com.cisco.policyconversiontool.dto.wsa.asyncos805.Config objConfig = TestUtil.getMockedConfig805();
+		   com.cisco.policyconversiontool.dto.wsa.asyncos805.HttpsCertificate objHttpsCertificate= TestUtil.getMockedHttpsCertificates805("", "");
+		   when(objConfig.getHttpsCertificate()).thenReturn(objHttpsCertificate);
+		   assertFalse(objPolicyConversionToolServiceImpl.checkHttpsCertificates(objConfig, "1"));
+		   
+		   objHttpsCertificate= TestUtil.getMockedHttpsCertificates805(" ", "");
+		   when(objConfig.getHttpsCertificate()).thenReturn(objHttpsCertificate);
+		   assertTrue(objPolicyConversionToolServiceImpl.checkHttpsCertificates(objConfig, "1"));
+	   }
 	   /**
-	    * 
-	    * @param args
+	    * Test case created to validate behavior of checkHttpsCertificate method.
+	    * For asyncos : 806
+		 * @throws Exception 
+		 * @throws FileNotFoundException 
 	    */
-	   
+	   @Test
+	   public void acceptanceCriteria1_testCase8() throws FileNotFoundException, Exception{
+		   com.cisco.policyconversiontool.dto.wsa.asyncos806.Config objConfig = TestUtil.getMockedConfig806();
+		   com.cisco.policyconversiontool.dto.wsa.asyncos806.HttpsCertificate objHttpsCertificate= TestUtil.getMockedHttpsCertificates806("", "");
+		   when(objConfig.getHttpsCertificate()).thenReturn(objHttpsCertificate);
+		   assertFalse(objPolicyConversionToolServiceImpl.checkHttpsCertificates(objConfig, "2"));
+		   
+		   objHttpsCertificate= TestUtil.getMockedHttpsCertificates806(" ", "");
+		   when(objConfig.getHttpsCertificate()).thenReturn(objHttpsCertificate);
+		   assertTrue(objPolicyConversionToolServiceImpl.checkHttpsCertificates(objConfig, "2"));
+	   }
 	   
 	   public static void main(String[] args) {
 		     Result result = JUnitCore.runClasses(MockTestClassFirst.class);
@@ -148,30 +174,5 @@ public class MockTestClassFirst {
 		      }
 		      System.out.print("==>Test Result : "+result.wasSuccessful());
 		   }
-	   
-	   public Config getMockedConfig()
-	   {
-		   Config objConfig = mock(Config.class);
-		   
-		   WgaConfig objWgaConfig = mock(WgaConfig.class);
-		   when(objConfig.getWgaConfig()).thenReturn(objWgaConfig);
-		   
-		   ProxAclPolicyGroups objProxAclGroups = mock(ProxAclPolicyGroups.class);
-		   when(objWgaConfig.getProxAclPolicyGroups()).thenReturn(objProxAclGroups);
-		   
-		   ArrayList<ProxAclGroup> objProxAclGroupList = mock(ArrayList.class);
-		   when(objProxAclGroups.getProxAclGroup()).thenReturn(objProxAclGroupList);
-		   
-		   ProxAclGroup objProxAclGroup = mock(ProxAclGroup.class);
-		   when(objProxAclGroupList.get(0)).thenReturn(objProxAclGroup);
-		   
-		   return objConfig;
-	   }
-	 
-	   public InputStream getInputStreams(String fileName) throws FileNotFoundException 
-	   {
-		
-			return new FileInputStream("src/test/resources/fixtures/"+fileName);
-	   }
 	   
 }
