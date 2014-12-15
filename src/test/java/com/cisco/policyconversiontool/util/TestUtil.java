@@ -3,23 +3,17 @@ package com.cisco.policyconversiontool.util;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.cisco.policyconversiontool.dto.cws.CWSPolicy;
 import com.cisco.policyconversiontool.dto.cws.Schedule;
-import com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclGroup;
-import com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclPolicyGroups;
-import com.cisco.policyconversiontool.dto.wsa.asyncos805.WgaConfig;
-import com.cisco.policyconversiontool.dto.wsa.asyncos805.Config;
 import com.cisco.policyconversiontool.service.cws.parsar.CWSParser;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.cisco.policyconversiontool.service.util.DTDProvider;
 
  
 
@@ -32,7 +26,9 @@ public class TestUtil {
 	public final static String CWS_CONFIG_WF = "cws/cwsConfig.json";  // cws Configuartion JSON file name which is well formed...
 	public final static String CWS_CONFIG_NWF = "cws/cwsConfigNWF.json";  // cws Configuartion JSON file name which is NOT well formed...
 	public final static String WSA_INIT_CONFIG_NEG_TEST = "wsa/wsaInitialConfig_neg_test.xml";  // WSA Configuartion xml file name which is well formed and used for negative test...
-	
+	public final static String CWS_CONFIG_FILE_PATH = "cws/SecurView_6_CiscoFixes.json";  // WSA intital Configuartion xml file name which is well formed...
+	public final static String CWS_CONFIG_FILE_PATH_US004 = "cws/SecurView__CiscoFixes__US004.json";  // WSA intital Configuartion xml file name which is well formed...
+
 	
 	public static List<Schedule> getSchedule(){
         ArrayList<Schedule> scheduleList = new ArrayList<Schedule>();
@@ -55,26 +51,57 @@ public class TestUtil {
         }
         return scheduleList;
     }
-	
-   public static Config getMockedConfig()
-   {
-	   Config objConfig = mock(Config.class);
-	   
-	   WgaConfig objWgaConfig = mock(WgaConfig.class);
-	   when(objConfig.getWgaConfig()).thenReturn(objWgaConfig);
-	   
-	   ProxAclPolicyGroups objProxAclGroups = mock(ProxAclPolicyGroups.class);
-	   when(objWgaConfig.getProxAclPolicyGroups()).thenReturn(objProxAclGroups);
-	   
-	   ArrayList<ProxAclGroup> objProxAclGroupList = mock(ArrayList.class);
-	   when(objProxAclGroups.getProxAclGroup()).thenReturn(objProxAclGroupList);
-	   
-	   ProxAclGroup objProxAclGroup = mock(ProxAclGroup.class);
-	   when(objProxAclGroupList.get(0)).thenReturn(objProxAclGroup);
-	   
-	   return objConfig;
-   }
+	public static com.cisco.policyconversiontool.dto.wsa.asyncos805.Config getMockedConfig805()
+	   {
+		com.cisco.policyconversiontool.dto.wsa.asyncos805.Config objConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos805.Config.class);
+		   
+			com.cisco.policyconversiontool.dto.wsa.asyncos805.WgaConfig objWgaConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos805.WgaConfig.class);
+		   when(objConfig.getWgaConfig()).thenReturn(objWgaConfig);
+		   
+		   com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclPolicyGroups objProxAclGroups = mock(com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclPolicyGroups.class);
+		   when(objWgaConfig.getProxAclPolicyGroups()).thenReturn(objProxAclGroups);
+		   
+		   ArrayList<com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclGroup> objProxAclGroupList = mock(ArrayList.class);
+		   when(objProxAclGroups.getProxAclGroup()).thenReturn(objProxAclGroupList);
+		   
+		   com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclGroup objProxAclGroup = mock(com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclGroup.class);
+		   when(objProxAclGroupList.get(0)).thenReturn(objProxAclGroup);
+		   
+		   return objConfig;
+	   }
+	public static com.cisco.policyconversiontool.dto.wsa.asyncos806.Config getMockedConfig806()
+	   {
+		com.cisco.policyconversiontool.dto.wsa.asyncos806.Config objConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos806.Config.class);
+		   
+			com.cisco.policyconversiontool.dto.wsa.asyncos806.WgaConfig objWgaConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos806.WgaConfig.class);
+		   when(objConfig.getWgaConfig()).thenReturn(objWgaConfig);
+		   
+		   com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclPolicyGroups objProxAclGroups = mock(com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclPolicyGroups.class);
+		   when(objWgaConfig.getProxAclPolicyGroups()).thenReturn(objProxAclGroups);
+		   
+		   ArrayList<com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclGroup> objProxAclGroupList = mock(ArrayList.class);
+		   when(objProxAclGroups.getProxAclGroup()).thenReturn(objProxAclGroupList);
+		   
+		   com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclGroup objProxAclGroup = mock(com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclGroup.class);
+		   when(objProxAclGroupList.get(0)).thenReturn(objProxAclGroup);
+		   
+		   return objConfig;
+	   }
  
+	public static com.cisco.policyconversiontool.dto.wsa.asyncos805.HttpsCertificate getMockedHttpsCertificates805(String certificate,String key)
+	{
+		com.cisco.policyconversiontool.dto.wsa.asyncos805.HttpsCertificate objHttpsCertificate = mock(com.cisco.policyconversiontool.dto.wsa.asyncos805.HttpsCertificate.class);
+		when(objHttpsCertificate.getCertificate()).thenReturn(certificate);
+		when(objHttpsCertificate.getKey()).thenReturn(key);
+		return objHttpsCertificate;
+	}
+	public static com.cisco.policyconversiontool.dto.wsa.asyncos806.HttpsCertificate getMockedHttpsCertificates806(String certificate,String key)
+	{
+		com.cisco.policyconversiontool.dto.wsa.asyncos806.HttpsCertificate objHttpsCertificate = mock(com.cisco.policyconversiontool.dto.wsa.asyncos806.HttpsCertificate.class);
+		when(objHttpsCertificate.getCertificate()).thenReturn(certificate);
+		when(objHttpsCertificate.getKey()).thenReturn(key);
+		return objHttpsCertificate;
+	}
    public static CWSPolicy getCWSPolicyConfig(String fileName) throws Exception
    {
 	   return readCWSConfiguration(getInputStreams(fileName));
@@ -87,6 +114,11 @@ public class TestUtil {
    {
 	   
 	   return new FileInputStream("src/test/resource/fixtures/"+fileName);
+   }
+   public static void policyConversionToolInitialSetup()
+   {
+	   DTDProvider.setAsyncos805DTD(new File("src//main//resource//config//wsaDTD805.dtd"));
+       DTDProvider.setAsyncos806DTD(new File("src//main//resource//config//wsaDTD806.dtd"));
    }
 
 }
