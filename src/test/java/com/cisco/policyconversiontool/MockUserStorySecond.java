@@ -42,9 +42,9 @@ public class MockUserStorySecond {
 	  */
 	 	@Test
 	   public void convertSchduleToTimeDefinition_testCase1() throws Exception {
-	 		List<WSATimeDefinition> wsaTimeDefinitionList = objWSAMigrator.convertScheduleToWSATimeRanges(TestUtil.getSchedule());
+	 		Map<String,WSATimeDefinition> wsaTimeDefinitionMap = objWSAMigrator.convertScheduleToWSATimeRanges(TestUtil.getSchedule());
 	 		
-	 		WSATimeDefinition objWSATimeDefinition = wsaTimeDefinitionList.get(0);
+	 		WSATimeDefinition objWSATimeDefinition = wsaTimeDefinitionMap.get("Test Schedule-1");
 	 		assertTrue(objWSATimeDefinition.getName().equals("Test Schedule-1"));
 	 		assertTrue(objWSATimeDefinition.getTimeZone().equals("Etc/GMT"));
 	 		assertTrue(objWSATimeDefinition.getTimeRangeList().get(0).getValidDays().get(0).equals(Constants.MONDAY));
