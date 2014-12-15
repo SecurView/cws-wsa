@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -89,30 +90,10 @@ public class XMLGeneratorWSA100Asyncos805 implements ApplianceXMLGenerator{
 
 //	asyncos805.wsas100v
 	HashMap<String,String> objCustomCategoryHashMap;  
-	private Config parseXML(InputStream in) throws JAXBException, SAXException, FileNotFoundException
-	{
-        JAXBContext ctx = JAXBContext.newInstance(Config.class);
-        Unmarshaller unmarshaller = ctx.createUnmarshaller();
-        XMLReader xmlreader = XMLReaderFactory.createXMLReader();
-        DTDEntityResolver enRes = new DTDEntityResolver();
-        enRes.setFile(DTDProvider.getAsyncos805DTD());
-        xmlreader.setEntityResolver(enRes);
-
-//        String xml = "C:\\tempTesting\\InitialConfig.xml";
-//        FileInputStream in = new FileInputStream(xml);
-        InputSource input = new InputSource(in);
-        Source source = new SAXSource(xmlreader, input);
-
-		return (Config)unmarshaller.unmarshal(source);
-	}
-	public OutputStream generateXML(WSAMigratedConfig wsaMigratedConfig) throws Exception {
+	public OutputStream generateXML(WSAMigratedConfig wsaMigratedConfig,Object objWSAInitialConfig) throws Exception {
 		
-		// generate root (Config ) object from input stream...
-		Config objConfig = parseXML(wsaMigratedConfig.getInputStream());
-//		JAXBContext jaxbContext = JAXBContext.newInstance(Config.class);  
-//		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-//		Config objConfig= (Config) jaxbUnmarshaller.unmarshal(wsaMigratedConfig.getInputStream());
-
+		Config objConfig = (Config)objWSAInitialConfig;
+ 
         String realmName = null;
         
         objCustomCategoryHashMap = new HashMap<String,String>();
@@ -209,9 +190,9 @@ public class XMLGeneratorWSA100Asyncos805 implements ApplianceXMLGenerator{
 				addApplication(objProxAclGroup,objWSAPolicy);
 				// setting identity...in Policy...prox_acl_identity_groups => prox_acl_group
 //				ProxAclGroup objIdentityProxAclGroup = null;
-				WSAIdentity objWSAIdentity = objWSAPolicy.getIdentity();
+				List<WSAIdentity> wsaIdentityList = objWSAPolicy.getWsaIdentityList();
 				// in Policy ... setting prox_acl_group_identities ===> prox_acl_group_identity
-				addIdentityDetailsInPolicy(objProxAclGroup,objWSAIdentity,realmName);
+				addIdentityDetailsInPolicy(objProxAclGroup,wsaIdentityList,realmName);
 			}
 		}
 		
@@ -243,9 +224,9 @@ public class XMLGeneratorWSA100Asyncos805 implements ApplianceXMLGenerator{
 				addCategories(objProxAclGroup, objWSAHttpsPolicy);
 				// setting identity......prox_acl_identity_groups => prox_acl_group
 //				ProxAclGroup objIdentityProxAclGroup = null;
-				WSAIdentity objWSAIdentity = objWSAHttpsPolicy.getIdentity();
+				List<WSAIdentity> wsaIdentityList = objWSAHttpsPolicy.getWsaIdentityList();
 				// in Policy ... setting prox_acl_group_identities ===> prox_acl_group_identity
-				addIdentityDetailsInPolicy(objProxAclGroup,objWSAIdentity,realmName);
+				addIdentityDetailsInPolicy(objProxAclGroup,wsaIdentityList,realmName);
 			}
 		
 		}
@@ -268,78 +249,95 @@ public class XMLGeneratorWSA100Asyncos805 implements ApplianceXMLGenerator{
         jaxbMarshaller.marshal(objConfig, objOutputStream);
 		return (OutputStream)objOutputStream;
 	}
-	private void addIdentityDetailsInPolicy(ProxAclGroup objProxAclGroup,WSAIdentity objWSAIdentity,String realmName) {
+	private void addIdentityDetailsInPolicy(ProxAclGroup objProxAclGroup,List<WSAIdentity> wsaIdentityList,String realmName) {
 
-		String clientType = objWSAIdentity.getType();
-		ProxAclGroupIdentities objProxAclGroupIdentitiesPolicy = objProxAclGroup.getProxAclGroupIdentities();
-		if(objProxAclGroupIdentitiesPolicy==null)
-		{
-			objProxAclGroupIdentitiesPolicy = new ProxAclGroupIdentities();
-			objProxAclGroup.setProxAclGroupIdentities(objProxAclGroupIdentitiesPolicy);
-		}
-		
-		ArrayList<ProxAclGroupIdentity> proxAclGroupIdentityPolicyList =  (ArrayList<ProxAclGroupIdentity>) objProxAclGroupIdentitiesPolicy.getProxAclGroupIdentity();
-		ProxAclGroupIdentity objProxAclGroupIdentityForPolicy = null;
-		 
-		objProxAclGroupIdentityForPolicy = new ProxAclGroupIdentity();
-		proxAclGroupIdentityPolicyList.add(objProxAclGroupIdentityForPolicy);
-		 
-		ProxAclGroupAuthGroups objProxAclGroupAuthGroups =  objProxAclGroupIdentityForPolicy.getProxAclGroupAuthGroups();
-		if(objProxAclGroupAuthGroups==null)
-		{
-			objProxAclGroupAuthGroups = new ProxAclGroupAuthGroups();
-			objProxAclGroupIdentityForPolicy.setProxAclGroupAuthGroups(objProxAclGroupAuthGroups);
-		}
-		ArrayList<ProxAclGroupAuthGroupsOfRealm>  proxAclGroupAuthGroupsOfRealmList = (ArrayList<ProxAclGroupAuthGroupsOfRealm>)objProxAclGroupAuthGroups.getProxAclGroupAuthGroupsOfRealm();
-		ProxAclGroupAuthGroupsOfRealm objProxAclGroupAuthGroupsOfRealm = new ProxAclGroupAuthGroupsOfRealm();
-		
-		
-		proxAclGroupAuthGroupsOfRealmList.add(objProxAclGroupAuthGroupsOfRealm);
-		
-		if(clientType.equals(Constants.CLIENTTYPE_USER))
-		{
-			ProxAclGroupUsernames objProxAclGroupUsernames = objProxAclGroupIdentityForPolicy.getProxAclGroupUsernames();
-			if(objProxAclGroupUsernames==null)
+		for(WSAIdentity objWSAIdentity : wsaIdentityList)
 			{
-				objProxAclGroupUsernames = new ProxAclGroupUsernames();
-				objProxAclGroupIdentityForPolicy.setProxAclGroupUsernames(objProxAclGroupUsernames);
-			}
-			ArrayList<ProxAclGroupUsername> proxAclGroupUsernameList =  (ArrayList<ProxAclGroupUsername>)objProxAclGroupUsernames.getProxAclGroupUsername();
-			ProxAclGroupUsername objProxAclGroupUsername = new ProxAclGroupUsername();
-			objProxAclGroupUsername.setvalue(objWSAIdentity.getName());
-			objProxAclGroupIdentityForPolicy.setProxAclGroupIdentityName(realmName);
-			proxAclGroupUsernameList.add(objProxAclGroupUsername);
-			objProxAclGroupAuthGroupsOfRealm.setProxAclGroupAuthRealmName(realmName);
-			// setting prox_acl_group_auth_sequence
-		}else if(clientType.equals(Constants.CLIENTTYPE_GROUP))
-		{
-			//prox_acl_group_auth_realm_groups
-			ProxAclGroupAuthRealmGroups objProxAclGroupAuthRealmGroups = objProxAclGroupAuthGroupsOfRealm.getProxAclGroupAuthRealmGroups();
-			if(objProxAclGroupAuthRealmGroups==null)
+			String clientType = objWSAIdentity.getType();
+			ProxAclGroupIdentities objProxAclGroupIdentitiesPolicy = objProxAclGroup.getProxAclGroupIdentities();
+			if(objProxAclGroupIdentitiesPolicy==null)
 			{
-				objProxAclGroupAuthRealmGroups = new ProxAclGroupAuthRealmGroups();
-				objProxAclGroupAuthGroupsOfRealm.setProxAclGroupAuthRealmGroups(objProxAclGroupAuthRealmGroups);
+				objProxAclGroupIdentitiesPolicy = new ProxAclGroupIdentities();
+				objProxAclGroup.setProxAclGroupIdentities(objProxAclGroupIdentitiesPolicy);
 			}
-			ArrayList<ProxAclGroupAuthGroup> objProxAclGroupAuthGroupList = (ArrayList<ProxAclGroupAuthGroup>) objProxAclGroupAuthRealmGroups.getProxAclGroupAuthGroup();
-			ProxAclGroupAuthGroup objProxAclGroupAuthGroup = new ProxAclGroupAuthGroup();
-			objProxAclGroupAuthGroupList.add(objProxAclGroupAuthGroup);
-			objProxAclGroupAuthGroup.setvalue(objWSAIdentity.getName());
-			objProxAclGroupIdentityForPolicy.setProxAclGroupIdentityName(realmName);
-			objProxAclGroupAuthGroupsOfRealm.setProxAclGroupAuthRealmName(realmName);
-		}else if(clientType.equals(Constants.CLIENTTYPE_DOMAIN))
-		{
-			objProxAclGroupIdentityForPolicy.setProxAclGroupIdentityName(realmName);
-			objProxAclGroupAuthGroupsOfRealm.setProxAclGroupAuthRealmName(realmName);
-
-		}else if(clientType.equals(Constants.CLIENTTYPE_COMPUTER))
-		{
-			objProxAclGroupIdentityForPolicy.setProxAclGroupIdentityName(objWSAIdentity.getName());
+			
+			ArrayList<ProxAclGroupIdentity> proxAclGroupIdentityPolicyList =  (ArrayList<ProxAclGroupIdentity>) objProxAclGroupIdentitiesPolicy.getProxAclGroupIdentity();
+			ProxAclGroupIdentity objProxAclGroupIdentityForPolicy = null;
+			 
+			objProxAclGroupIdentityForPolicy = new ProxAclGroupIdentity();
+			proxAclGroupIdentityPolicyList.add(objProxAclGroupIdentityForPolicy);
+			 
+			ProxAclGroupAuthGroups objProxAclGroupAuthGroups =  objProxAclGroupIdentityForPolicy.getProxAclGroupAuthGroups();
+			if(objProxAclGroupAuthGroups==null)
+			{
+				objProxAclGroupAuthGroups = new ProxAclGroupAuthGroups();
+				objProxAclGroupIdentityForPolicy.setProxAclGroupAuthGroups(objProxAclGroupAuthGroups);
+			}
+			ArrayList<ProxAclGroupAuthGroupsOfRealm>  proxAclGroupAuthGroupsOfRealmList = (ArrayList<ProxAclGroupAuthGroupsOfRealm>)objProxAclGroupAuthGroups.getProxAclGroupAuthGroupsOfRealm();
+			ProxAclGroupAuthGroupsOfRealm objProxAclGroupAuthGroupsOfRealm = new ProxAclGroupAuthGroupsOfRealm();
+			
+			proxAclGroupAuthGroupsOfRealmList.add(objProxAclGroupAuthGroupsOfRealm);
+			
+			if(clientType.equals(Constants.CLIENTTYPE_USER))
+			{
+				ProxAclGroupUsernames objProxAclGroupUsernames = objProxAclGroupIdentityForPolicy.getProxAclGroupUsernames();
+				if(objProxAclGroupUsernames==null)
+				{
+					objProxAclGroupUsernames = new ProxAclGroupUsernames();
+					objProxAclGroupIdentityForPolicy.setProxAclGroupUsernames(objProxAclGroupUsernames);
+				}
+				ArrayList<ProxAclGroupUsername> proxAclGroupUsernameList =  (ArrayList<ProxAclGroupUsername>)objProxAclGroupUsernames.getProxAclGroupUsername();
+				ProxAclGroupUsername objProxAclGroupUsername = new ProxAclGroupUsername();
+				objProxAclGroupUsername.setvalue(objWSAIdentity.getName());
+				objProxAclGroupIdentityForPolicy.setProxAclGroupIdentityName(realmName);
+				proxAclGroupUsernameList.add(objProxAclGroupUsername);
+				objProxAclGroupAuthGroupsOfRealm.setProxAclGroupAuthRealmName(realmName);
+				// setting prox_acl_group_auth_sequence
+			}else if(clientType.equals(Constants.CLIENTTYPE_GROUP))
+			{
+				//prox_acl_group_auth_realm_groups
+				ProxAclGroupAuthRealmGroups objProxAclGroupAuthRealmGroups = objProxAclGroupAuthGroupsOfRealm.getProxAclGroupAuthRealmGroups();
+				if(objProxAclGroupAuthRealmGroups==null)
+				{
+					objProxAclGroupAuthRealmGroups = new ProxAclGroupAuthRealmGroups();
+					objProxAclGroupAuthGroupsOfRealm.setProxAclGroupAuthRealmGroups(objProxAclGroupAuthRealmGroups);
+				}
+				ArrayList<ProxAclGroupAuthGroup> objProxAclGroupAuthGroupList = (ArrayList<ProxAclGroupAuthGroup>) objProxAclGroupAuthRealmGroups.getProxAclGroupAuthGroup();
+				ProxAclGroupAuthGroup objProxAclGroupAuthGroup = new ProxAclGroupAuthGroup();
+				objProxAclGroupAuthGroupList.add(objProxAclGroupAuthGroup);
+				objProxAclGroupAuthGroup.setvalue(objWSAIdentity.getName());
+				objProxAclGroupIdentityForPolicy.setProxAclGroupIdentityName(realmName);
+				objProxAclGroupAuthGroupsOfRealm.setProxAclGroupAuthRealmName(realmName);
+			}else if(clientType.equals(Constants.CLIENTTYPE_DOMAIN))
+			{
+				objProxAclGroupIdentityForPolicy.setProxAclGroupIdentityName(realmName);
+				objProxAclGroupAuthGroupsOfRealm.setProxAclGroupAuthRealmName(realmName);
+	
+			}else if(clientType.equals(Constants.CLIENTTYPE_COMPUTER))
+			{
+				objProxAclGroupIdentityForPolicy.setProxAclGroupIdentityName(objWSAIdentity.getName());
+				objProxAclGroupIdentityForPolicy.setProxAclGroupAuthGroups(new ProxAclGroupAuthGroups());
+				objProxAclGroupIdentityForPolicy.setProxAclGroupUsernames(new ProxAclGroupUsernames());
+				objProxAclGroupIdentityForPolicy.setProxAclGroupAuthRealm(null);
+				objProxAclGroupIdentityForPolicy.setProxAclGroupForGuestsOnly("0");
+			}
+			else if(clientType.equals(Constants.CLIENTTYPE_NETWORK))
+			{
+//				 <prox_acl_group_auth_groups>
+//                 </prox_acl_group_auth_groups>
+//                 <prox_acl_group_usernames>
+//                 </prox_acl_group_usernames>
+//                 <prox_acl_group_auth_realm></prox_acl_group_auth_realm>
+//                 <prox_acl_group_for_guests_only>0</prox_acl_group_for_guests_only>
+//                 <prox_acl_group_order>0</prox_acl_group_order>
+				objProxAclGroupIdentityForPolicy.setProxAclGroupIdentityName(objWSAIdentity.getName());
+				objProxAclGroupIdentityForPolicy.setProxAclGroupAuthGroups(new ProxAclGroupAuthGroups());
+				objProxAclGroupIdentityForPolicy.setProxAclGroupUsernames(new ProxAclGroupUsernames());
+				objProxAclGroupIdentityForPolicy.setProxAclGroupAuthRealm(null);
+				objProxAclGroupIdentityForPolicy.setProxAclGroupForGuestsOnly("0");
+			}
 		}
-		else if(clientType.equals(Constants.CLIENTTYPE_NETWORK))
-		{
-			objProxAclGroupIdentityForPolicy.setProxAclGroupIdentityName(objWSAIdentity.getName());
-		}
-		
+			
 	}
 	private void addApplication(ProxAclGroup objProxAclGroup,WSAPolicy objWSAPolicy) {
 		
