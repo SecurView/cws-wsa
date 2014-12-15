@@ -7,5 +7,5 @@ import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSAMigratedConfig;
 
 
 public interface ApplianceXMLGenerator {
-	public OutputStream generateXML(WSAMigratedConfig wsaMigratedConfig) throws Exception;
+	public OutputStream generateXML(WSAMigratedConfig wsaMigratedConfig,Object objWSAInitialConfig) throws Exception;
 }
