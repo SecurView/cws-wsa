@@ -34,8 +34,6 @@ public class Schedule {
     private List<String> days = new ArrayList<String>();
     @JsonProperty("timezone")
     private String timezone;
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     /**
      * 
@@ -137,14 +135,5 @@ public class Schedule {
         this.timezone = timezone;
     }
 
-    @JsonAnyGetter
-    public Map<String, Object> getAdditionalProperties() {
-        return this.additionalProperties;
-    }
-
-    @JsonAnySetter
-    public void setAdditionalProperty(String name, Object value) {
-        this.additionalProperties.put(name, value);
-    }
 
 }
