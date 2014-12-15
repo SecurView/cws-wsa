@@ -2,6 +2,12 @@ package com.cisco.policyconversiontool.service.util;
 
 public class Constants 
 {
+	public  final static String WINNT="WinNT://";
+    public  final static String LDAP="LDAP://";
+    public  final static String AUTH_GROUP_TYPE_CUSTOM="";
+    public  final static String AUTH_GROUP_TYPE_DIRECTORY="";
+    public  final static String CATAGORY_CHILD_ABUSE_CONTENT_CODE="1064";
+    
 	public static final String NEW_LINE = "\r\n";
 	public static final String CWS_ACTION_ALLOW = "1";
 	public static final String CWS_ACTION_BLOCK = "2";
@@ -40,10 +46,10 @@ public class Constants
 	
 	public  final static String LIMITEDACCESSFILTER="1";
 	public  final static String CUSTOM="2";
-	public  final static String ACTION_PERMIT="Permit";
-	public  final static String ACTION_BLOCK="Block";
-	public  final static String ACTION_SCAN="Scan";
-	public  final static String ACTION_MONITOR="Monitor";
+	public  final static String ACTION_PERMIT="permit";
+	public  final static String ACTION_BLOCK="block";
+	public  final static String ACTION_SCAN="scan";
+	public  final static String ACTION_MONITOR="monitor";
 	
 	public  final static String BEFORE="1";
 	public  final static String EQUAL="0";
@@ -63,7 +69,7 @@ public class Constants
 	public final static long ARGTYPE_SCHEDULE_NAME = 2L;
 	public final static long ARGTYPE_AUTHGROUP_NAME = 3L;
 	
-	public final static String POLICY_NAME_SEPRATOR = "_____";
+	public final static String POLICY_NAME_SEPRATOR = ".";
 	
 	public final static String TRUE = "true";
 	
