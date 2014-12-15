@@ -1,48 +1,34 @@
 package com.cisco.policyconversiontool.service.wsa.migrator;
  
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXSource;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
-
 import com.cisco.policyconversiontool.dao.ApplicationDAO;
 import com.cisco.policyconversiontool.dao.URLCategoryDAO;
+import com.cisco.policyconversiontool.dto.URLCategory;
 import com.cisco.policyconversiontool.dto.WSAMigrationParameters;
 import com.cisco.policyconversiontool.dto.cws.AdvRule;
 import com.cisco.policyconversiontool.dto.cws.AdvRuleArgument;
 import com.cisco.policyconversiontool.dto.cws.AuthGroup;
+import com.cisco.policyconversiontool.dto.cws.BlacklistDomain;
+import com.cisco.policyconversiontool.dto.cws.BlacklistIp;
 import com.cisco.policyconversiontool.dto.cws.CWSPolicy;
 import com.cisco.policyconversiontool.dto.cws.FilterPolicy;
+import com.cisco.policyconversiontool.dto.cws.HttpCategory;
 import com.cisco.policyconversiontool.dto.cws.IpExpression;
 import com.cisco.policyconversiontool.dto.cws.Schedule;
 import com.cisco.policyconversiontool.dto.cws.User;
-import com.cisco.policyconversiontool.dto.wsa.asyncos805.Config;
-import com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclGroup;
-import com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclPolicyGroups;
+import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSACategory;
+import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSACustomCategory;
 import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSAIdentity;
 import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSAMigratedConfig;
 import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSAPolicy;
 import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSATimeDefinition;
 import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSATimeRange;
-import com.cisco.policyconversiontool.service.cws.parsar.CWSParser;
 import com.cisco.policyconversiontool.service.util.Constants;
-import com.cisco.policyconversiontool.service.util.DTDEntityResolver;
-import com.cisco.policyconversiontool.service.util.DTDProvider;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.cisco.policyconversiontool.service.util.LogUtil;
  
 
 
@@ -68,33 +54,53 @@ public class WSAMigrator
 		this.applicationDAO = applicationDAO;
 	}
 
-	public WSAMigratedConfig generateWSAPolicyConfig(CWSPolicy objCWSPolicy, WSAMigrationParameters wsaMigrationParameters) throws Exception 
+	public WSAMigratedConfig generateWSAPolicyConfig(CWSPolicy objCWSPolicy, WSAMigrationParameters wsaMigrationParameters,StringBuffer reviewBuffer) throws Exception 
 	{
-		StringBuffer reviewBuffer = new StringBuffer();
 		WSAMigratedConfig objWSAMigratedConfig = new WSAMigratedConfig();
 		
-		Map<String,Boolean> usedUnusedFilterPolicy = getUsedUnusedFilterPolicy(objCWSPolicy);
-		logUnusedHttpFilters(usedUnusedFilterPolicy,reviewBuffer);
+		//
 		
-		List<WSATimeDefinition> wsaTimeDefinitionList = convertScheduleToWSATimeRanges(objCWSPolicy.getSchedules());
-		List<WSAIdentity> wsaIdentityList = null ;
-		List<WSAPolicy> wsaPolicyList= getWSAPolicies(objCWSPolicy.getAdvRules(),wsaIdentityList,wsaTimeDefinitionList,reviewBuffer);
+		// Log unused Http Filters.....
+		logUnusedHttpFilters(objCWSPolicy,reviewBuffer);
 		
+		Map<String,WSATimeDefinition> wsaTimeDefinitionMap = convertScheduleToWSATimeRanges(objCWSPolicy.getSchedules());
+		Map<String,WSAIdentity> wsaIdentityMap = getAuthGroupsIdentity(objCWSPolicy.getAuthGroups(),reviewBuffer) ;
+		List<WSAPolicy> wsaPolicyList= getWSAPolicies(objCWSPolicy,wsaIdentityMap,wsaTimeDefinitionMap,reviewBuffer);
 		
-		
+		objWSAMigratedConfig.setWsaIdentityList(getIdentityListFromMap(wsaIdentityMap));
+		objWSAMigratedConfig.setWsaTimeDefinitionList(getTimeDefinitionListFromMap(wsaTimeDefinitionMap));
+		objWSAMigratedConfig.setWsaPolicyList(wsaPolicyList);
 		
 		return objWSAMigratedConfig;
 	}
-	private List<WSAPolicy> getWSAPolicies(List<AdvRule> advRulesList,List<WSAIdentity> wsaIdentityList,List<WSATimeDefinition> wsaTimeDefinitionList,StringBuffer reviewBuffer)
+	private List<WSATimeDefinition> getTimeDefinitionListFromMap(Map<String, WSATimeDefinition> wsaTimeDefinitionMap) {
+		List<WSATimeDefinition> wsaTimeDefinitionList = new ArrayList<WSATimeDefinition>();
+		for(String key : wsaTimeDefinitionMap.keySet())
+		{
+			wsaTimeDefinitionList.add(wsaTimeDefinitionMap.get(key));
+		}
+		return wsaTimeDefinitionList;
+	}
+
+	private List<WSAIdentity> getIdentityListFromMap(Map<String, WSAIdentity> wsaIdentityMap) {
+		List<WSAIdentity> wsaIdentityList = new ArrayList<WSAIdentity>();
+		for(String key : wsaIdentityMap.keySet())
+		{
+			wsaIdentityList.add(wsaIdentityMap.get(key));
+		}
+		return wsaIdentityList;
+	}
+
+	private List<WSAPolicy> getWSAPolicies(CWSPolicy objCWSPolicy,Map<String,WSAIdentity> wsaIdentityMap, Map<String,WSATimeDefinition> wsaTimeDefinitionMap,StringBuffer reviewBuffer) throws IOException
 	{
 		List<WSAPolicy> wsaPolicyList = new ArrayList<WSAPolicy>();
-		String scenarioFirst[] = {"N.A","N.A","Monitor","Monitor","Monitor","Monitor","Block","Monitor"};
-		String scenarioSecond[] = {"N.A","N.A","Block","Block","Block","Block","Monitor","Block"};
-		String scenarioThird[] = {"N.A","N.A","Warn","Warn","Warn","Warn","Block","Warn"};
-		String scenarioFourth[] =  {"N.A","N.A","Block","Block","Block","Block","Warn","Block"};
+		String scenarioFirst[] = {"N.A","N.A","monitor","monitor","monitor","monitor","block","monitor"};
+		String scenarioSecond[] = {"N.A","N.A","block","block","block","block","monitor","block"};
+		String scenarioThird[] = {"N.A","N.A","warn","warn","warn","warn","block","warn"};
+		String scenarioFourth[] =  {"N.A","N.A","block","block","block","block","warn","block"};
 		String scenario[] = null;
 		StringBuffer reviewBufferLocal = new StringBuffer();
-		for(AdvRule objAdvRule : advRulesList)
+		for(AdvRule objAdvRule : objCWSPolicy.getAdvRules())
 		{
 			 String ruleName = objAdvRule.getName();
 			 String ruleDescription = objAdvRule.getDescription();
@@ -167,8 +173,10 @@ public class WSAMigrator
 								 scenario = scenarioThird;
 							 }
 						 }
+						 FilterPolicy objFilterPolicy = getFilterPolicyListFromName(objCWSPolicy.getFilterPolicies(),filterPolicyName);
+						 AuthGroup objAuthGroup = getAuthGroupFromAuthGroupList(objCWSPolicy.getAuthGroups(), authGroupName);
 						 
-						 wsaPolicyList.add(createWSAPolicy(ruleName,ruleDescription,authGroupName,scheduleName,isScheduleException,filterPolicyName,scenario,wsaIdentityList,wsaTimeDefinitionList));
+						 wsaPolicyList.add(createWSAPolicy(ruleName,ruleDescription,authGroupName,scheduleName,isScheduleException,filterPolicyName,scenario,wsaIdentityMap, wsaTimeDefinitionMap,reviewBuffer,objFilterPolicy,objAuthGroup));
 					 }
 				 }
 			 }
@@ -182,21 +190,184 @@ public class WSAMigrator
 		return wsaPolicyList;
 	}
 
-	public WSAPolicy createWSAPolicy(String ruleName,String ruleDescription,String authGroupName,String scheduleName,boolean isScheduleException,String filterPolicyName,String [] scenario, List<WSAIdentity> wsaIdentityList, List<WSATimeDefinition> wsaTimeDefinitionList)
+	private FilterPolicy getFilterPolicyListFromName(List<FilterPolicy> filterPolicyList, String filterPolicyName) {
+		
+		for(FilterPolicy objFilterPolicy : filterPolicyList)
+		{
+			if(filterPolicyName.equals(objFilterPolicy.getName()))
+				return objFilterPolicy;
+		}
+		return null;
+	}
+	
+	private AuthGroup getAuthGroupFromAuthGroupList(List<AuthGroup> authGroupList, String authGroupName) {
+		
+		for(AuthGroup objAuthGroup : authGroupList)
+		{
+			if(authGroupName.equals(objAuthGroup.getName()))
+				return objAuthGroup;
+		}
+		return null;
+	}
+	
+	public WSAPolicy createWSAPolicy(String ruleName,String ruleDescription,String authGroupName,String scheduleName,boolean isScheduleException,String filterPolicyName,String [] scenario,Map<String,WSAIdentity> wsaIdentityMap, Map<String,WSATimeDefinition> wsaTimeDefinitionMap,StringBuffer reviewBuffer,FilterPolicy objFilterPolicy,AuthGroup objAuthGroup) throws IOException
 	{
-		WSAPolicy objWSAPolicy = new WSAPolicy();
+		 WSAPolicy objWSAPolicy = new WSAPolicy();
 		 String wsaPolicyName = (ruleName+Constants.POLICY_NAME_SEPRATOR+authGroupName+Constants.POLICY_NAME_SEPRATOR+scheduleName+Constants.POLICY_NAME_SEPRATOR+filterPolicyName).replace("/", "").replace(":", "").replace(" ", "");
 		 System.out.println(wsaPolicyName);
 		 objWSAPolicy.setName(wsaPolicyName);
-		 objWSAPolicy.setDescription((ruleDescription==null?"":ruleDescription)+".Description");
+		 objWSAPolicy.setDescription((ruleDescription==null?wsaPolicyName:ruleDescription)+".Description");
 		 
+		 List<WSAIdentity> wsaIdentityList  = new ArrayList<WSAIdentity>();
 		 
+		 // iterate over auth group=>users.....
+		 for(User objUser : objAuthGroup.getUsers())
+		 {
+			 wsaIdentityList.add(wsaIdentityMap.get(objUser.getName()));
+		 }
+		 // iterate over auth group==>ip Expressions.....
+		 for(IpExpression objIpExpressions : objAuthGroup.getIpExpressions())
+		 {
+			 wsaIdentityList.add(wsaIdentityMap.get(objIpExpressions.getExpression()));
+		 }
 		 
+		 objWSAPolicy.setWsaIdentityList(wsaIdentityList);
+		 
+		 objWSAPolicy.setTimeDefinition(wsaTimeDefinitionMap.get(scheduleName));
+		 
+//		 url categories
+		 objWSAPolicy.setWsaCategoryList(getHttpCategoryToURLCategory(objFilterPolicy.getHttpCategories(),reviewBuffer,scenario[2],wsaPolicyName));
+//		 Domains --- custom url categories
+		 objWSAPolicy.setWsaCustomCategoryList(getDomainToCustomURLCategory(filterPolicyName,objFilterPolicy.getBlacklistDomains(),objFilterPolicy.getBlacklistIps(),scenario[3]));
+//		 Applications
+		 objWSAPolicy.setWsaApplicationList(null);
+//		 User Agents
+		 objWSAPolicy.setWsaUserAgentList(null);
+//		 Custom User Agents
+		 objWSAPolicy.setWsaCustomUserAgentList(null);
+//		 Content Types
+		 objWSAPolicy.setWsaMIMETypeList(null);
+
+//		 Exception
 		return objWSAPolicy;
 	}
-	public void logUnusedHttpFilters(Map<String,Boolean> usedUnusedFilterPolicy, StringBuffer reviewBuffer)
+	/**Conversion of CWS Policy with Used Filters having Domains
+	 **/
+
+	private List<WSACustomCategory> getDomainToCustomURLCategory( String filterName,List<BlacklistDomain> blacklistDomainList,List<BlacklistIp> blacklistIpList , String action) throws IOException
+	{
+		List<WSACustomCategory> wsaCustomCategoryList =  new ArrayList<WSACustomCategory>();
+		WSACustomCategory wsaCustomCategory	            =  new WSACustomCategory();
+		List<String> sites							    =  new ArrayList<String>();
+		wsaCustomCategory.setName(filterName);
+		wsaCustomCategory.setAction(action);
+		for (BlacklistDomain blacklistDomain : blacklistDomainList) {
+			sites.add(blacklistDomain.getAddress().replaceFirst("www.", ""));
+		}
+		
+		for (BlacklistIp blacklistIp : blacklistIpList) {
+			sites.add(blacklistIp.getAddress());
+		}
+		
+		wsaCustomCategory.setSites(sites);
+		wsaCustomCategoryList.add(wsaCustomCategory);
+		return wsaCustomCategoryList;
+	}
+	private List<WSACategory> getHttpCategoryToURLCategory(List<HttpCategory> httpCategoryList,StringBuffer reviewBuffer,String action,String policyName) throws IOException
+	{
+		List<WSACategory> wsaHttpCategoryList =  new ArrayList<WSACategory>();
+		Map<String, URLCategory> urlCategoryMap 		= 	urlCategoryDAO.getURLCategoryMap("1");
+		for (HttpCategory httpCategory : httpCategoryList) {
+			String category 							= 	httpCategory.getName();
+			URLCategory urlCategory						= 	urlCategoryMap.get(category);
+			if (urlCategory != null) {
+				String categorycode=urlCategory.getCode().trim();
+				WSACategory wsaCategory 				= 	getWSACategory(categorycode,wsaHttpCategoryList);
+				if (wsaCategory == null) {
+					wsaCategory							= 	new WSACategory();
+					wsaCategory.setId(categorycode);
+					wsaCategory.setAction(action);
+					wsaHttpCategoryList.add(wsaCategory);
+				}
+			}
+			else{
+				//TODO: Add the unmapped category in review file.
+				reviewBuffer.append( "!*********************Policy Name : policyname*************************!\r\n" );
+				reviewBuffer.append( "Category Name :	"+category.trim()+"\r\n\r\n" );
+			}
+		} 
+		WSACategory wsaCategory							= new WSACategory();
+		wsaCategory.setId(Constants.CATAGORY_CHILD_ABUSE_CONTENT_CODE);
+		wsaCategory.setAction(Constants.ACTION_BLOCK);
+		wsaHttpCategoryList.add(wsaCategory);
+		return wsaHttpCategoryList;
+	}
+
+	private WSACategory getWSACategory(String categorycode, List<WSACategory> wsaCategoryList) 
+	{
+		for (WSACategory wsaCategory: wsaCategoryList) {	  
+			if(wsaCategory == null || wsaCategory.getId() == null)
+				continue;
+			if(wsaCategory.getId().equals(categorycode)){
+				return wsaCategory;
+			}
+		}
+		return null;
+	}
+	
+	private Map<String,WSAIdentity> getAuthGroupsIdentity( List<AuthGroup> authGroupList,StringBuffer reviewBuffer) throws IOException
+	{
+		Map<String,WSAIdentity> wsaIdentityMap 			= new  HashMap<String,WSAIdentity>();
+		for (AuthGroup authGroup : authGroupList) {
+			if(authGroup.getName().startsWith(Constants.WINNT)){
+				WSAIdentity wsaIdentity    				= new WSAIdentity(); 
+				wsaIdentity.setName(authGroup.getName().replace(Constants.WINNT, ""));
+				wsaIdentity.setType(Constants.CLIENTTYPE_GROUP);
+				wsaIdentityMap.put(authGroup.getName(), wsaIdentity);
+			}else if(authGroup.getName().startsWith(Constants.LDAP)){
+				reviewBuffer.append( "Identity Name :	"+authGroup.getName().replace(Constants.LDAP, "")+"\r\n\r\n");
+			}else{
+
+				List<User> userList  					= authGroup.getUsers();
+				if( userList != null ){
+					for (User user : userList) {
+						if(user.getName().startsWith(Constants.LDAP))
+						{
+							reviewBuffer.append( "Identity Name :	"+user.getName().replace(Constants.LDAP, "")+"\r\n\r\n");
+
+						}else {
+							WSAIdentity wsaIdentity     = new WSAIdentity(); 
+							wsaIdentity.setName(user.getName().replace(Constants.WINNT, ""));
+							wsaIdentity.setType(Constants.CLIENTTYPE_USER);
+							wsaIdentityMap.put(user.getName(),wsaIdentity);
+
+						}
+					}
+				}
+				List<IpExpression> IpExpressionList 	= authGroup.getIpExpressions();
+				if( IpExpressionList != null ){
+					for ( IpExpression ipExpression : IpExpressionList) {
+						WSAIdentity wsaIdentity     	= new WSAIdentity(); 
+						String identityName 			= ipExpression.getExpression();
+						if(identityName.endsWith("/32")) {
+						wsaIdentity.setName(identityName);
+						wsaIdentity.setType(Constants.CLIENTTYPE_COMPUTER);
+						} else {
+						wsaIdentity.setName(identityName);
+						wsaIdentity.setType(Constants.CLIENTTYPE_NETWORK);
+						}
+						wsaIdentityMap.put(identityName,wsaIdentity);
+					}
+				}
+		  }
+		}
+		return wsaIdentityMap;
+	}
+	
+	public void logUnusedHttpFilters(CWSPolicy objCWSPolicy, StringBuffer reviewBuffer)
 	{
 		String unusedFilters = "";
+		Map<String,Boolean> usedUnusedFilterPolicy = getUsedUnusedFilterPolicy(objCWSPolicy);
 		// iterate HashMap if value of filter Name gets false it is unused filter there should be entry in review file...
 		 for(String filterName : usedUnusedFilterPolicy.keySet())
 		 {
@@ -208,7 +379,7 @@ public class WSAMigrator
 		 // if there are unused http filter then there should be header..
 		 if(unusedFilters.length() > 0)
 		 {
-			 reviewBuffer.append(Constants.NEW_LINE+"********************************** Unused Filter Policy *****************************");
+			 reviewBuffer.append(Constants.NEW_LINE+LogUtil.getHeader("Unused Filter Policy"));
 			 reviewBuffer.append(Constants.NEW_LINE + unusedFilters);
 		 }
 	}
@@ -242,9 +413,9 @@ public class WSAMigrator
 		}
 		return usedUnusedFilterPolicy;
 	}
-	public List<WSATimeDefinition> convertScheduleToWSATimeRanges(List<Schedule> scheduleList)
+	public Map<String,WSATimeDefinition> convertScheduleToWSATimeRanges(List<Schedule> scheduleList)
 	{
-		List<WSATimeDefinition> wsaTimeDefinitionList = new ArrayList<WSATimeDefinition>();
+		Map<String,WSATimeDefinition> wsaTimeDefinitionMap = new HashMap<String,WSATimeDefinition>();
 		Schedule objSchedule = null;
 		String weekday[] = { Constants.SUNDAY , Constants.MONDAY , Constants.TUESDAY , Constants.WEDNESDAY , Constants.THURSDAY , Constants.FRIDAY , Constants.SATURDAY };
 		
@@ -271,9 +442,9 @@ public class WSAMigrator
 			}
 			objWSATimeRange.setValidDays(objWeekDaysList);
 			wsaTimeRangeList.add(objWSATimeRange);
-			wsaTimeDefinitionList.add(objWSATimeDefinition);
+			wsaTimeDefinitionMap.put(objSchedule.getName(),objWSATimeDefinition);
 		}
-		return wsaTimeDefinitionList;
+		return wsaTimeDefinitionMap;
 	}
 	
 	public WSATimeDefinition getTimeDefinitionFromList(String timeDefinitionName,List<WSATimeDefinition> wsaTimeDefinitionList)
@@ -286,58 +457,4 @@ public class WSAMigrator
 		return null;
 	}
 	
-	 
-	public Config readWSAConfiguration(InputStream wsaInitialConfig) throws Exception  
-	{
-		Config objConfig = null;
-		try{
-		 	JAXBContext ctx = JAXBContext.newInstance(Config.class);
-	        Unmarshaller unmarshaller = ctx.createUnmarshaller();
-	        XMLReader xmlreader = XMLReaderFactory.createXMLReader();
-	        DTDEntityResolver enRes = new DTDEntityResolver();
-	        enRes.setFile(DTDProvider.getAsyncos806DTD());
-	        xmlreader.setEntityResolver(enRes);
-	        InputSource input = new InputSource(wsaInitialConfig);
-	        Source source = new SAXSource(xmlreader, input);
-	        objConfig = (Config)unmarshaller.unmarshal(source);
-		}catch(Exception e)
-		{
-			throw new Exception("Invalid initial WSA configuration");
-		}
-
-		return objConfig;
-	}
-	public boolean checkWebReputation(Config objConfig)
-	{
-		//prox_acl_policy_groups
-		ProxAclPolicyGroups objProxAclPolicyGroup = objConfig.getWgaConfig().getProxAclPolicyGroups();
-		ProxAclGroup objProxAclGroup = objProxAclPolicyGroup.getProxAclGroup().get(0);
-		if(objProxAclGroup.getProxAclGroupWbrsEnabled().equalsIgnoreCase("yes"))
-			return true;
-		else
-			return false;
-	}
-	public boolean checkHttpsCertificates(Config objConfig,CWSPolicy objCWSPolicy)
-	{
-		ArrayList<Object> httpsCertificateList = (ArrayList<Object>) objCWSPolicy.getHttpsCerts();
-		if(httpsCertificateList==null)
-			return false;
-		if(objConfig.getHttpsCertificate()==null)
-			return false;
-		Object httpsCertificate = null;
-		for(int httpsCertificateIndex = 0; httpsCertificateIndex < httpsCertificateList.size() ; httpsCertificateIndex++)
-		{
-			httpsCertificate  = httpsCertificateList.get(httpsCertificateIndex);
-			if(objConfig.getHttpsCertificate().getCertificate().equals(httpsCertificate.toString()))
-			{
-					return true;
-			}
-		}
-		return false;
-	}
-	public static void main(String arg[]) throws Exception
-	{
-		WSAMigrator objWSAMigrator = new WSAMigrator();
-		objWSAMigrator.generateWSAPolicyConfig((new CWSParser()).doParsing(new FileInputStream("src/test/resource/fixtures/cws/SecurView_6_CiscoFixes.json")),null);
-	}
 }
