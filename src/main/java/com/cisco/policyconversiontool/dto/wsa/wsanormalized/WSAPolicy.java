@@ -10,24 +10,21 @@ import com.cisco.policyconversiontool.service.util.Constants;
 public class WSAPolicy implements Serializable , Comparator<WSAPolicy>, Comparable<WSAPolicy>{
 	private String name;
 	private String description;
-	private WSAIdentity identity;
+	private List<WSAIdentity> wsaIdentityList;
 	private WSATimeDefinition timeDefinition;
 	private String clientType;
 	private List<WSACategory> wsaCategoryList;
 	private List<WSACustomCategory> wsaCustomCategoryList;
 	private List<WSAApplication> wsaApplicationList;
+	private List<WSAUserAgent> wsaUserAgentList;
+	private List<String> wsaCustomUserAgentList;
+	private List<WSAMIMEType> wsaMIMETypeList;
 	
 	public String getName() {
 		return name;
 	}
 	public void setName(String name) {
 		this.name = name;
-	}
-	public WSAIdentity getIdentity() {
-		return identity;
-	}
-	public void setIdentity(WSAIdentity identity) {
-		this.identity = identity;
 	}
 	public WSATimeDefinition getTimeDefinition() {
 		return timeDefinition;
@@ -61,83 +58,45 @@ public class WSAPolicy implements Serializable , Comparator<WSAPolicy>, Comparab
 			List<WSACustomCategory> wsaCustomCategoryList) {
 		this.wsaCustomCategoryList = wsaCustomCategoryList;
 	}
-
-	@Override
-	public int compareTo(WSAPolicy wsaPolicy) { 
-	int iprange=0;
-	int thisint=0;
-	if(((WSAPolicy) wsaPolicy).getIdentity().getName().contains("/"))
-	{
-		iprange=Integer.parseInt(((WSAPolicy) wsaPolicy).getIdentity().getName().split("/")[1]);
-		
-	}
-	if(this.getIdentity().getName().contains("/"))
-	{
-		thisint=Integer.parseInt(this.getIdentity().getName().split("/")[1]);
-	}
-		//int iprangeno = iprange;
-		//descending order
-		return  thisint-iprange;
- 
-	}	
-	@Override
-	public int compare(WSAPolicy NwsaPolicy1, WSAPolicy NwsaPolicy2) 
-	{
-		String ip1[]=new String[2];
-		String ip2[]=new String[2];
-		String idaddress1="";
-		String idaddress2="";
-		
-		if(NwsaPolicy1.getIdentity().getType().equals(Constants.CLIENTTYPE_USER)){
-		  return (NwsaPolicy2.getIdentity().getName()).compareTo(NwsaPolicy1.getIdentity().getName());
-		}
-		
-		if(NwsaPolicy1.getIdentity().getType().equals(Constants.CLIENTTYPE_NETWORK)){
-				if(NwsaPolicy1.getIdentity().getName().contains("/")){
-				ip1=NwsaPolicy1.getIdentity().getName().split("/");
-				idaddress1=ip1[0].trim();
-				}else{
-					idaddress1=NwsaPolicy1.getIdentity().getName().trim();
-				}
-				
-				if(NwsaPolicy2.getIdentity().getName().contains("/")){
-				ip2=NwsaPolicy2.getIdentity().getName().split("/");
-				idaddress2=ip2[0].trim();
-				}else{
-					idaddress2=NwsaPolicy2.getIdentity().getName().trim();
-				}
-		}else{
-				idaddress1=NwsaPolicy1.getIdentity().getName().trim();
-				idaddress2=NwsaPolicy2.getIdentity().getName().trim();
-		}
-		
-		byte[] ba1 =idaddress1.getBytes();
-		byte[] ba2 =idaddress2.getBytes();
-        
-        if(ba1.length < ba2.length) return 1;
-        if(ba1.length > ba2.length) return -1;
-
-        for(int i = 0; i < ba1.length; i++){
-            int b1 = unsignedByteToInt(ba1[i]);
-            int b2 = unsignedByteToInt(ba2[i]);
-            if(b1 == b2)
-                continue;
-            if(b1 < b2)
-                return 1;
-            else
-                return -1;
-        }
-        return 0;
-        
-    }
-	private int unsignedByteToInt(byte b) {
-        return (int) b & 0xFF;
-    }
 	public String getDescription() {
 		return description;
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	public List<WSAUserAgent> getWsaUserAgentList() {
+		return wsaUserAgentList;
+	}
+	public void setWsaUserAgentList(List<WSAUserAgent> wsaUserAgentList) {
+		this.wsaUserAgentList = wsaUserAgentList;
+	}
+	public List<String> getWsaCustomUserAgentList() {
+		return wsaCustomUserAgentList;
+	}
+	public void setWsaCustomUserAgentList(List<String> wsaCustomUserAgentList) {
+		this.wsaCustomUserAgentList = wsaCustomUserAgentList;
+	}
+	public List<WSAMIMEType> getWsaMIMETypeList() {
+		return wsaMIMETypeList;
+	}
+	public void setWsaMIMETypeList(List<WSAMIMEType> wsaMIMITypeList) {
+		this.wsaMIMETypeList = wsaMIMITypeList;
+	}
+	public List<WSAIdentity> getWsaIdentityList() {
+		return wsaIdentityList;
+	}
+	public void setWsaIdentityList(List<WSAIdentity> wsaIdentityList) {
+		this.wsaIdentityList = wsaIdentityList;
+	}
+	@Override
+	public int compareTo(WSAPolicy o) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public int compare(WSAPolicy o1, WSAPolicy o2) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 		
 }
