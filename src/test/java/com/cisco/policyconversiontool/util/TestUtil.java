@@ -52,41 +52,41 @@ public class TestUtil {
         return scheduleList;
     }
 	public static com.cisco.policyconversiontool.dto.wsa.asyncos805.Config getMockedConfig805()
-	   {
-		com.cisco.policyconversiontool.dto.wsa.asyncos805.Config objConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos805.Config.class);
-		   
-			com.cisco.policyconversiontool.dto.wsa.asyncos805.WgaConfig objWgaConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos805.WgaConfig.class);
-		   when(objConfig.getWgaConfig()).thenReturn(objWgaConfig);
-		   
-		   com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclPolicyGroups objProxAclGroups = mock(com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclPolicyGroups.class);
-		   when(objWgaConfig.getProxAclPolicyGroups()).thenReturn(objProxAclGroups);
-		   
-		   ArrayList<com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclGroup> objProxAclGroupList = mock(ArrayList.class);
-		   when(objProxAclGroups.getProxAclGroup()).thenReturn(objProxAclGroupList);
-		   
-		   com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclGroup objProxAclGroup = mock(com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclGroup.class);
-		   when(objProxAclGroupList.get(0)).thenReturn(objProxAclGroup);
-		   
-		   return objConfig;
-	   }
+   {
+	com.cisco.policyconversiontool.dto.wsa.asyncos805.Config objConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos805.Config.class);
+	   
+		com.cisco.policyconversiontool.dto.wsa.asyncos805.WgaConfig objWgaConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos805.WgaConfig.class);
+	   when(objConfig.getWgaConfig()).thenReturn(objWgaConfig);
+	   
+	   com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclPolicyGroups objProxAclGroups = mock(com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclPolicyGroups.class);
+	   when(objWgaConfig.getProxAclPolicyGroups()).thenReturn(objProxAclGroups);
+	   
+	   ArrayList<com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclGroup> objProxAclGroupList = mock(ArrayList.class);
+	   when(objProxAclGroups.getProxAclGroup()).thenReturn(objProxAclGroupList);
+	   
+	   com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclGroup objProxAclGroup = mock(com.cisco.policyconversiontool.dto.wsa.asyncos805.ProxAclGroup.class);
+	   when(objProxAclGroupList.get(0)).thenReturn(objProxAclGroup);
+	   
+	   return objConfig;
+   }
 	public static com.cisco.policyconversiontool.dto.wsa.asyncos806.Config getMockedConfig806()
-	   {
-		com.cisco.policyconversiontool.dto.wsa.asyncos806.Config objConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos806.Config.class);
-		   
-			com.cisco.policyconversiontool.dto.wsa.asyncos806.WgaConfig objWgaConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos806.WgaConfig.class);
-		   when(objConfig.getWgaConfig()).thenReturn(objWgaConfig);
-		   
-		   com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclPolicyGroups objProxAclGroups = mock(com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclPolicyGroups.class);
-		   when(objWgaConfig.getProxAclPolicyGroups()).thenReturn(objProxAclGroups);
-		   
-		   ArrayList<com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclGroup> objProxAclGroupList = mock(ArrayList.class);
-		   when(objProxAclGroups.getProxAclGroup()).thenReturn(objProxAclGroupList);
-		   
-		   com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclGroup objProxAclGroup = mock(com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclGroup.class);
-		   when(objProxAclGroupList.get(0)).thenReturn(objProxAclGroup);
-		   
-		   return objConfig;
-	   }
+   {
+	com.cisco.policyconversiontool.dto.wsa.asyncos806.Config objConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos806.Config.class);
+	   
+		com.cisco.policyconversiontool.dto.wsa.asyncos806.WgaConfig objWgaConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos806.WgaConfig.class);
+	   when(objConfig.getWgaConfig()).thenReturn(objWgaConfig);
+	   
+	   com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclPolicyGroups objProxAclGroups = mock(com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclPolicyGroups.class);
+	   when(objWgaConfig.getProxAclPolicyGroups()).thenReturn(objProxAclGroups);
+	   
+	   ArrayList<com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclGroup> objProxAclGroupList = mock(ArrayList.class);
+	   when(objProxAclGroups.getProxAclGroup()).thenReturn(objProxAclGroupList);
+	   
+	   com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclGroup objProxAclGroup = mock(com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclGroup.class);
+	   when(objProxAclGroupList.get(0)).thenReturn(objProxAclGroup);
+	   
+	   return objConfig;
+   }
  
 	public static com.cisco.policyconversiontool.dto.wsa.asyncos805.HttpsCertificate getMockedHttpsCertificates805(String certificate,String key)
 	{
