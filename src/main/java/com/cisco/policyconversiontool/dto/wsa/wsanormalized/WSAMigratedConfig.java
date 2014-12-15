@@ -11,7 +11,6 @@ public class WSAMigratedConfig {
 	private InputStream inputStream;
 	private List<WSATimeDefinition> wsaTimeDefinitionList;
 	private List<WSAIdentity> wsaIdentityList;
-	private ByteArrayOutputStream reviewByteArrayOutputStream;
 	
 	
 	public List<WSAPolicy> getWsaPolicyList() {
@@ -31,13 +30,6 @@ public class WSAMigratedConfig {
 	}
 	public void setInputStream(InputStream inputStream) {
 		this.inputStream = inputStream;
-	}
-	public ByteArrayOutputStream getReviewByteArrayOutputStream() {
-		return reviewByteArrayOutputStream;
-	}
-	public void setReviewByteArrayOutputStream(
-			ByteArrayOutputStream reviewByteArrayOutputStream) {
-		this.reviewByteArrayOutputStream = reviewByteArrayOutputStream;
 	}
 	public List<WSATimeDefinition> getWsaTimeDefinitionList() {
 		return wsaTimeDefinitionList;
