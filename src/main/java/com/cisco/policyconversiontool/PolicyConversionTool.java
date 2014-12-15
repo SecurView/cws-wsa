@@ -14,9 +14,9 @@ public class PolicyConversionTool
 	public static void main(String args[]) {
 	
 		try {
-			PropertyConfigurator.configure("config/log4j.properties");
+//			PropertyConfigurator.configure("config/log4j.properties");
 			logger = Logger.getLogger(PolicyConversionTool.class);
-			new AppController().start(args);
+			new AppController().start(null);
 			System.out.println("\n\nExiting.");
 			System.exit(0);
 		} catch (Exception e) {
