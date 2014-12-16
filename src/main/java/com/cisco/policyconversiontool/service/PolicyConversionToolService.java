@@ -5,8 +5,7 @@ package com.cisco.policyconversiontool.service;
 
 import java.io.OutputStream;
 
-import com.cisco.policyconversiontool.dto.WSAMigrationPageInfo;
-import com.cisco.policyconversiontool.dto.WSAMigrationParameters;
+import com.cisco.policyconversiontool.dto.PolicyConversionParameters;
 import com.cisco.policyconversiontool.service.exception.PolicyConversionToolException;
 
 /**
@@ -15,6 +14,5 @@ import com.cisco.policyconversiontool.service.exception.PolicyConversionToolExce
  */
 public interface PolicyConversionToolService {
 
-	public WSAMigrationPageInfo getWSAMigrationPageInfo() ;
-	public OutputStream doWSAMigration(WSAMigrationParameters wsaMigrationParameters) throws PolicyConversionToolException; 
+	public OutputStream doPolicyConversion(PolicyConversionParameters policyConversionParameters) throws PolicyConversionToolException; 
 }
