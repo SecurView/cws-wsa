@@ -30,10 +30,10 @@ import com.cisco.policyconversiontool.dao.ApplianceDAO;
 import com.cisco.policyconversiontool.dao.VendorDAO;
 import com.cisco.policyconversiontool.dao.VendorSoftwareDAO;
 import com.cisco.policyconversiontool.dto.Appliance;
+import com.cisco.policyconversiontool.dto.PolicyConversionParameters;
 import com.cisco.policyconversiontool.dto.Software;
 import com.cisco.policyconversiontool.dto.Vendor;
 import com.cisco.policyconversiontool.dto.WSAMigrationPageInfo;
-import com.cisco.policyconversiontool.dto.WSAMigrationParameters;
 import com.cisco.policyconversiontool.dto.cws.CWSPolicy;
 import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSAMigratedConfig;
 import com.cisco.policyconversiontool.service.cws.parsar.ApplianceParser;
@@ -43,6 +43,7 @@ import com.cisco.policyconversiontool.service.exception.PolicyConversionToolExce
 import com.cisco.policyconversiontool.service.util.Constants;
 import com.cisco.policyconversiontool.service.util.DTDEntityResolver;
 import com.cisco.policyconversiontool.service.util.DTDProvider;
+import com.cisco.policyconversiontool.service.util.LogUtil;
 import com.cisco.policyconversiontool.service.wsa.migrator.ApplianceXMLGenerator;
 import com.cisco.policyconversiontool.service.wsa.migrator.ApplianceXMLGeneratorFactory;
 import com.cisco.policyconversiontool.service.wsa.migrator.WSAMigrator;
@@ -94,97 +95,74 @@ public class PolicyConversionToolServiceImpl implements PolicyConversionToolServ
 		wsaMigrationPageInfo.setApplianceList(applianceDAO.getAppliances());
 		wsaMigrationPageInfo.setSoftwareList(vendorSoftwareDAO.getSoftwareList());
 		wsaMigrationPageInfo.setTargetVendorList(vendorDAO.getVendors(Integer.parseInt(Constants.DAO_TARGET_PLATFORM)));
-		
 		return wsaMigrationPageInfo;
 	
 	}
-	
-	public OutputStream doWSAMigration(WSAMigrationParameters wsaMigrationParameters) throws PolicyConversionToolException 
+	@Override
+	public OutputStream doPolicyConversion(PolicyConversionParameters policyConversionParameters) throws PolicyConversionToolException 
 	{
 		ByteArrayOutputStream objByteArrayOutputStrem = null;
 		DateFormat dateFormat = new SimpleDateFormat("\r\n\r\n[yyyy-MM-dd HH:mm:ss] : ");
-		StringBuffer loggerStream = new StringBuffer();
-		String sourceVendor = null;
+		StringBuffer objApplicationLogBuffer = new StringBuffer();
 		 try{
 		// setting selected params....
-		loggerStream.append(dateFormat.format(new Date())+"Application Started.");
+		objApplicationLogBuffer.append(dateFormat.format(new Date())+"Application Started.");
 //			
-		loggerStream.append(dateFormat.format(new Date())+"Source Vendor Details :\r\n--------------------------");
-		Vendor objVendor = vendorDAO.getVendor(wsaMigrationParameters.getSourceVendor());
-		loggerStream.append("\r\n\tVendor    : " + objVendor.getName());
-		sourceVendor = objVendor.getName();
-		Appliance objAppliance = applianceDAO.getAppliance(wsaMigrationParameters.getSourceAppliance());
-		loggerStream.append("\r\n\tAppliance : " + objAppliance.getName());
-		Software objSoftware =  vendorSoftwareDAO.getSoftware(wsaMigrationParameters.getSourceSoftware());
-		loggerStream.append("\r\n\tSoftware  : " + objSoftware.getName());
+		objApplicationLogBuffer.append(dateFormat.format(new Date())+"Source Vendor Details :\r\n--------------------------");
+		objApplicationLogBuffer.append("\r\n\tVendor    : CWS");
+		objApplicationLogBuffer.append("\r\n\tAppliance : CWS");
 		
-		loggerStream.append(dateFormat.format(new Date())+"Target Vendor Details :\r\n--------------------------");
-		objVendor = vendorDAO.getVendor(wsaMigrationParameters.getTargetVendor());
-		loggerStream.append("\r\n\tVendor    : " + objVendor.getName());
-		objAppliance = applianceDAO.getAppliance(wsaMigrationParameters.getTargetAppliance());
-		loggerStream.append("\r\n\tAppliance : " + objAppliance.getName());
-		objSoftware =  vendorSoftwareDAO.getSoftware(wsaMigrationParameters.getTargetSoftware());
-		loggerStream.append("\r\n\tSoftware  : " + objSoftware.getName());
+		objApplicationLogBuffer.append(dateFormat.format(new Date())+"Target Vendor Details :\r\n--------------------------");
+		objApplicationLogBuffer.append("\r\n\tVendor    : WSA");
+		objApplicationLogBuffer.append("\r\n\tAppliance : WSA");
+		Software objSoftware =  vendorSoftwareDAO.getSoftware(policyConversionParameters.getTargetSoftware());
+		objApplicationLogBuffer.append("\r\n\tSoftware  : " + objSoftware.getName());
 		
-		loggerStream.append(dateFormat.format(new Date())+"Application is initialised properly");
+		objApplicationLogBuffer.append(dateFormat.format(new Date())+"Application is initialised properly");
 		
-		loggerStream.append(dateFormat.format(new Date())+"Validating the WSA Inital Configuration.");
-		StringBuffer reviewBuffer = new StringBuffer();
-		Object objWSAConfig = validateWSAInitalConfig(wsaMigrationParameters.getTargetXMLFile(),wsaMigrationParameters.getTargetSoftware(),reviewBuffer);
+		objApplicationLogBuffer.append(dateFormat.format(new Date())+"Validating the WSA Inital Configuration.");
+		StringBuffer objReviewBuffer = new StringBuffer();
+		Object objWSAConfig = validateInitalConfig(policyConversionParameters,objReviewBuffer);
 		
 		
-		loggerStream.append(dateFormat.format(new Date())+"Parsing configuration data...");
+		objApplicationLogBuffer.append(dateFormat.format(new Date())+"Parsing configuration data...");
 		
 		ApplianceParserFactory obj_applienceParserFactory = new ApplianceParserFactory();
-		ApplianceParser obj_appParser = obj_applienceParserFactory.getApplianceParser(wsaMigrationParameters.getSourceAppliance());
-		loggerStream.append(dateFormat.format(new Date())+sourceVendor+" config parser started");
+		ApplianceParser obj_appParser = obj_applienceParserFactory.getApplianceParser();
+		objApplicationLogBuffer.append(dateFormat.format(new Date())+"CWS config parser started");
 		
-		InputStream inputStream = wsaMigrationParameters.getSourceArchievedFile();
-		byte[] bytes = IOUtils.toByteArray(inputStream);
-		inputStream.close();
-		inputStream = new ByteArrayInputStream(bytes);
 		
-		loggerStream.append(dateFormat.format(new Date())+"Parsing " + sourceVendor +" input File.");
-		CWSPolicy objCWSPolicy = obj_appParser.doParsing(inputStream);
-		loggerStream.append(dateFormat.format(new Date())+ sourceVendor +" config parsing completed.");
+		objApplicationLogBuffer.append(dateFormat.format(new Date())+"Parsing CWS Configuration.");
+		CWSPolicy objCWSPolicy = obj_appParser.doParsing(policyConversionParameters.getSourceConfiguration());
+		objApplicationLogBuffer.append(dateFormat.format(new Date())+ "CWS config parsing completed.");
 		
 		 
-		loggerStream.append(dateFormat.format(new Date())+"Generating commands from Parsed data...");
-		WSAMigratedConfig wsaMigratedConfig=wsaMigrator.generateWSAPolicyConfig(objCWSPolicy,wsaMigrationParameters,reviewBuffer);
-		loggerStream.append(dateFormat.format(new Date())+"\r\nTransaction Summary : \r\n--------------------------");
+		objApplicationLogBuffer.append(dateFormat.format(new Date())+"Generating commands from Parsed data...");
+		WSAMigratedConfig wsaMigratedConfig=wsaMigrator.generateWSAPolicyConfig(objCWSPolicy,objReviewBuffer);
+		objApplicationLogBuffer.append(dateFormat.format(new Date())+"\r\nTransaction Summary : \r\n--------------------------");
 		// set Transaction Summary into loggerStream.....
-		loggerStream.append("\r\n\tTotal Http Policy  : "+(wsaMigratedConfig.getWsaPolicyList()==null?"0":wsaMigratedConfig.getWsaPolicyList().size()));
-		loggerStream.append("\r\n\tTotal Https Policy : "+(wsaMigratedConfig.getWsaHttpsPolicyList()==null?"0":wsaMigratedConfig.getWsaHttpsPolicyList().size()));
-		loggerStream.append("\r\n\tTotal Identities   : "+(wsaMigratedConfig.getWsaIdentityList()==null?"0":wsaMigratedConfig.getWsaIdentityList().size()));
+		objApplicationLogBuffer.append("\r\n\tTotal Http Policy  : "+(wsaMigratedConfig.getWsaPolicyList()==null?"0":wsaMigratedConfig.getWsaPolicyList().size()));
+		objApplicationLogBuffer.append("\r\n\tTotal Https Policy : "+(wsaMigratedConfig.getWsaHttpsPolicyList()==null?"0":wsaMigratedConfig.getWsaHttpsPolicyList().size()));
+		objApplicationLogBuffer.append("\r\n\tTotal Identities   : "+(wsaMigratedConfig.getWsaIdentityList()==null?"0":wsaMigratedConfig.getWsaIdentityList().size()));
 		
-//		wsaMigrator.printwsaMigratedConfig(wsaMigratedConfig);
 		
 		ApplianceXMLGeneratorFactory objApplianceXMLGeneratorFactory = new ApplianceXMLGeneratorFactory();
-		wsaMigratedConfig.setInputStream(wsaMigrationParameters.getTargetXMLFile());
-		ApplianceXMLGenerator objApplianceXMLGenerator =   objApplianceXMLGeneratorFactory.getApplianceXMLGenerator(wsaMigrationParameters.getTargetAppliance(),wsaMigrationParameters.getTargetSoftware());
-		OutputStream wsaXMLOutputStream = objApplianceXMLGenerator.generateXML(wsaMigratedConfig,objWSAConfig);
-		
-//		OutputStream out = new FileOutputStream("D:\\output.xml");
-//		out.write(wsaXMLOutputStream.toString().getBytes());
+		ApplianceXMLGenerator objApplianceXMLGenerator =   objApplianceXMLGeneratorFactory.getApplianceXMLGenerator(policyConversionParameters.getTargetAppliance(),policyConversionParameters.getTargetSoftware());
+		String objWSAGeneratedConfig = objApplianceXMLGenerator.generateXML(wsaMigratedConfig,objWSAConfig);
 		
 		// generate Zip Archive...here....
 		objByteArrayOutputStrem  = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(objByteArrayOutputStrem);
-		addToZipFile(bytes,zos,Constants.FILE_SOURCE_PATH+".json");
-		addToZipFile((reviewBuffer.toString()).getBytes(),zos,Constants.FILE_TARGET_REVIEW_PATH);
-		addToZipFile(((ByteArrayOutputStream)wsaXMLOutputStream).toByteArray(),zos,Constants.FILE_TARGET_XML_PATH);
+		addToZipFile(policyConversionParameters.getSourceConfiguration().getBytes(),zos,Constants.FILE_SOURCE_PATH+".json");
+		addToZipFile((objReviewBuffer.toString()).getBytes(),zos,Constants.FILE_TARGET_REVIEW_PATH);
+		addToZipFile(objWSAGeneratedConfig.getBytes(),zos,Constants.FILE_TARGET_XML_PATH);
 		
 		
-		loggerStream.append(dateFormat.format(new Date())+"Processing Status : Successful");
-		loggerStream.append(dateFormat.format(new Date())+"Conversion completed successfully.");
+		objApplicationLogBuffer.append(dateFormat.format(new Date())+"Processing Status : Successful");
+		objApplicationLogBuffer.append(dateFormat.format(new Date())+"Conversion completed successfully.");
 		
-//			FileInputStream fis = new FileInputStream(new File(Constants.FILE_LOG_INPUT_PATH));
-			addToZipFile(loggerStream.toString().getBytes(),zos,Constants.FILE_LOG_OUTPUT_PATH);
-//			fis.close();
-			
-//			fis = new FileInputStream(new File(Constants.FILE_PDF_INPUT_PATH));
-//			addToZipFile(IOUtils.toByteArray(fis),zos,Constants.FILE_PDF_OUTPUT_PATH);
-//			fis.close();
+		// add log file to archive...
+		addToZipFile(objApplicationLogBuffer.toString().getBytes(),zos,Constants.FILE_LOG_OUTPUT_PATH);
 		zos.close();
 		
 		 }catch(Exception e){
@@ -205,25 +183,45 @@ public class PolicyConversionToolServiceImpl implements PolicyConversionToolServ
    		zos.write(in, 0, in.length);
    		zos.closeEntry();
    	}
-	public Object validateWSAInitalConfig(InputStream wsaInitialConfig,String software,StringBuffer reviewBuffer) throws Exception
+	public Object validateInitalConfig(PolicyConversionParameters objPolicyConversionParameters,StringBuffer reviewBuffer) throws Exception
 	{
-		Object objConfig = readWSAConfiguration(wsaInitialConfig, software);
-		boolean flag = checkWebReputation(objConfig,software);
+		// validate the parameters.....
+		if(objPolicyConversionParameters.getSourceConfiguration()==null  )
+		{
+			throw new Exception("Source Configuration is Invalid.");
+		}
+		if(! objPolicyConversionParameters.getTargetAppliance().equals(Constants.TARGET_APPLIENCE_ID_WSA) )
+		{
+			throw new Exception("Target Appliance is Invalid.");
+		}
+		if( objPolicyConversionParameters.getTargetConfiguration() == null )
+		{
+			throw new Exception("Target Configuration is Invalid.");
+		}
+		if( !(objPolicyConversionParameters.getTargetSoftware().equals(Constants.TARGET_SOWFWARE_WSA_ASYNCOS805) || objPolicyConversionParameters.getTargetSoftware().equals(Constants.TARGET_SOWFWARE_WSA_ASYNCOS806)) )
+		{
+			throw new Exception("Target Software is Invalid.");
+		}
+		
+		//*******************************
+		Object objConfig = readWSAConfiguration(objPolicyConversionParameters.getTargetConfiguration(), objPolicyConversionParameters.getTargetSoftware());
+		
+		boolean flag = checkWebReputation(objConfig, objPolicyConversionParameters.getTargetSoftware());
 		if(!flag)
 		{
-			reviewBuffer.append(Constants.NEW_LINE + Constants.NEW_LINE + "!************************ Web Reputation ***********************************!");
+			reviewBuffer.append(Constants.NEW_LINE + Constants.NEW_LINE + LogUtil.getHeader("Web Reputation"));
 			reviewBuffer.append(Constants.NEW_LINE + Constants.NEW_LINE + "Web Reputation is not enabled in Default Policy of WSA.");
 		}
-		flag = checkHttpsCertificates(objConfig, software);
+		flag = checkHttpsCertificates(objConfig,  objPolicyConversionParameters.getTargetSoftware());
 		if(!flag)
 		{
-			reviewBuffer.append(Constants.NEW_LINE + Constants.NEW_LINE + "!************************ Https Certificate ***********************************!");
+			reviewBuffer.append(Constants.NEW_LINE + Constants.NEW_LINE + LogUtil.getHeader("Https Certificate"));
 			reviewBuffer.append(Constants.NEW_LINE + Constants.NEW_LINE + "The HTTPS certificate is not configured on the WSA.");
 		}
 		return objConfig;
 		
 	}
-	public boolean checkHttpsCertificates(Object objConfig,String software) throws Exception
+	private boolean checkHttpsCertificates(Object objConfig,String software) throws Exception
 	{
 		if(software.equals(Constants.TARGET_SOWFWARE_WSA_ASYNCOS805))
 		{
@@ -245,37 +243,36 @@ public class PolicyConversionToolServiceImpl implements PolicyConversionToolServ
 		}
 		return true;
 	}
-	public Object readWSAConfiguration(InputStream wsaInitialConfig,String software) throws Exception
+	private Object readWSAConfiguration(String wsaInitialConfiguration,String software) throws Exception
 	{
 		Object objConfig = null;
 		JAXBContext ctx = null;
-		File asyncosDTD = null;
+		File asyncosDTD = DTDProvider.getAsyncosDTD();
 		try{
 			if(software.equals(Constants.TARGET_SOWFWARE_WSA_ASYNCOS805))
 			{
 				ctx = JAXBContext.newInstance(com.cisco.policyconversiontool.dto.wsa.asyncos805.Config.class);
-				asyncosDTD = DTDProvider.getAsyncos805DTD();
 			}else if(software.equals(Constants.TARGET_SOWFWARE_WSA_ASYNCOS806))
 			{
 				ctx = JAXBContext.newInstance(com.cisco.policyconversiontool.dto.wsa.asyncos806.Config.class);
-				asyncosDTD = DTDProvider.getAsyncos806DTD();
 			}
 	        Unmarshaller unmarshaller = ctx.createUnmarshaller();
 	        XMLReader xmlreader = XMLReaderFactory.createXMLReader();
 	        DTDEntityResolver enRes = new DTDEntityResolver();
 	        enRes.setFile(asyncosDTD);
 	        xmlreader.setEntityResolver(enRes);
-	        InputSource input = new InputSource(wsaInitialConfig);
+	        InputSource input = new InputSource(new ByteArrayInputStream(wsaInitialConfiguration.getBytes()));
 	        Source source = new SAXSource(xmlreader, input);
 	        objConfig = unmarshaller.unmarshal(source);
 		}catch(Exception e)
 		{
+//			e.printStackTrace();
 			throw new Exception("Invalid initial WSA configuration");
 		}
 
 		return objConfig;
 	}
-	public boolean checkWebReputation(Object objConfig,String software) throws Exception
+	private boolean checkWebReputation(Object objConfig,String software) throws Exception
 	{
 		//prox_acl_policy_groups
 		if(software.equals(Constants.TARGET_SOWFWARE_WSA_ASYNCOS805))
@@ -286,15 +283,13 @@ public class PolicyConversionToolServiceImpl implements PolicyConversionToolServ
 				return true;
 			else
 				return false;
-		}else if(software.equals(Constants.TARGET_SOWFWARE_WSA_ASYNCOS806))
-		{
-			com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclPolicyGroups objProxAclPolicyGroup = ((com.cisco.policyconversiontool.dto.wsa.asyncos806.Config)objConfig).getWgaConfig().getProxAclPolicyGroups();
-			com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclGroup objProxAclGroup = objProxAclPolicyGroup.getProxAclGroup().get(0);
-			if(objProxAclGroup.getProxAclGroupWbrsEnabled().equalsIgnoreCase("yes"))
-				return true;
-			else
-				return false;
 		}
-		throw new Exception("Target Software is invalid.");
+		com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclPolicyGroups objProxAclPolicyGroup = ((com.cisco.policyconversiontool.dto.wsa.asyncos806.Config)objConfig).getWgaConfig().getProxAclPolicyGroups();
+		com.cisco.policyconversiontool.dto.wsa.asyncos806.ProxAclGroup objProxAclGroup = objProxAclPolicyGroup.getProxAclGroup().get(0);
+		if(objProxAclGroup.getProxAclGroupWbrsEnabled().equalsIgnoreCase("yes"))
+			return true;
+		else
+			return false;
 	}
+
 }
