@@ -1,14 +1,11 @@
 package com.cisco.policyconversiontool.dto.wsa.wsanormalized;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.util.List;
 
 
 public class WSAMigratedConfig {
 	private List<WSAPolicy> wsaPolicyList;
 	private List<WSAPolicy> wsaHttpsPolicyList;
-	private InputStream inputStream;
 	private List<WSATimeDefinition> wsaTimeDefinitionList;
 	private List<WSAIdentity> wsaIdentityList;
 	
@@ -24,12 +21,6 @@ public class WSAMigratedConfig {
 	}
 	public void setWsaHttpsPolicyList(List<WSAPolicy> wsaHttpsPolicyList) {
 		this.wsaHttpsPolicyList = wsaHttpsPolicyList;
-	}
-	public InputStream getInputStream() {
-		return inputStream;
-	}
-	public void setInputStream(InputStream inputStream) {
-		this.inputStream = inputStream;
 	}
 	public List<WSATimeDefinition> getWsaTimeDefinitionList() {
 		return wsaTimeDefinitionList;
