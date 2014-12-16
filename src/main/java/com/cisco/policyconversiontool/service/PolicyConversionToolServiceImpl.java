@@ -3,15 +3,9 @@ package com.cisco.policyconversiontool.service;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -21,7 +15,6 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 
-import org.apache.poi.util.IOUtils;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
@@ -29,16 +22,13 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import com.cisco.policyconversiontool.dao.ApplianceDAO;
 import com.cisco.policyconversiontool.dao.VendorDAO;
 import com.cisco.policyconversiontool.dao.VendorSoftwareDAO;
-import com.cisco.policyconversiontool.dto.Appliance;
 import com.cisco.policyconversiontool.dto.PolicyConversionParameters;
 import com.cisco.policyconversiontool.dto.Software;
-import com.cisco.policyconversiontool.dto.Vendor;
 import com.cisco.policyconversiontool.dto.WSAMigrationPageInfo;
 import com.cisco.policyconversiontool.dto.cws.CWSPolicy;
 import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSAMigratedConfig;
 import com.cisco.policyconversiontool.service.cws.parsar.ApplianceParser;
 import com.cisco.policyconversiontool.service.cws.parsar.ApplianceParserFactory;
-import com.cisco.policyconversiontool.service.cws.parsar.CWSParser;
 import com.cisco.policyconversiontool.service.exception.PolicyConversionToolException;
 import com.cisco.policyconversiontool.service.util.Constants;
 import com.cisco.policyconversiontool.service.util.DTDEntityResolver;
@@ -47,7 +37,6 @@ import com.cisco.policyconversiontool.service.util.LogUtil;
 import com.cisco.policyconversiontool.service.wsa.migrator.ApplianceXMLGenerator;
 import com.cisco.policyconversiontool.service.wsa.migrator.ApplianceXMLGeneratorFactory;
 import com.cisco.policyconversiontool.service.wsa.migrator.WSAMigrator;
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 
 public class PolicyConversionToolServiceImpl implements PolicyConversionToolService {
 
@@ -188,19 +177,19 @@ public class PolicyConversionToolServiceImpl implements PolicyConversionToolServ
 		// validate the parameters.....
 		if(objPolicyConversionParameters.getSourceConfiguration()==null  )
 		{
-			throw new Exception("Source Configuration is Invalid.");
+			throw new Exception(Constants.ERROR_SRC_CONFIG_INVALID);
 		}
 		if(! objPolicyConversionParameters.getTargetAppliance().equals(Constants.TARGET_APPLIENCE_ID_WSA) )
 		{
-			throw new Exception("Target Appliance is Invalid.");
+			throw new Exception(Constants.ERROR_TRG_APPLIANCE_INVALID);
 		}
 		if( objPolicyConversionParameters.getTargetConfiguration() == null )
 		{
-			throw new Exception("Target Configuration is Invalid.");
+			throw new Exception(Constants.ERROR_TRG_CONFIG_INVALID);
 		}
 		if( !(objPolicyConversionParameters.getTargetSoftware().equals(Constants.TARGET_SOWFWARE_WSA_ASYNCOS805) || objPolicyConversionParameters.getTargetSoftware().equals(Constants.TARGET_SOWFWARE_WSA_ASYNCOS806)) )
 		{
-			throw new Exception("Target Software is Invalid.");
+			throw new Exception(Constants.ERROR_TRG_SOFTWARE_INVALID);
 		}
 		
 		//*******************************
@@ -239,7 +228,7 @@ public class PolicyConversionToolServiceImpl implements PolicyConversionToolServ
 			}
 		}else
 		{
-			throw new Exception("Target Software is invalid.");
+			throw new Exception(Constants.ERROR_TRG_SOFTWARE_INVALID);
 		}
 		return true;
 	}
@@ -247,7 +236,7 @@ public class PolicyConversionToolServiceImpl implements PolicyConversionToolServ
 	{
 		Object objConfig = null;
 		JAXBContext ctx = null;
-		File asyncosDTD = DTDProvider.getAsyncosDTD();
+		File asyncosDTD = DTDProvider.getAsyncosDTD(software);
 		try{
 			if(software.equals(Constants.TARGET_SOWFWARE_WSA_ASYNCOS805))
 			{
@@ -267,7 +256,7 @@ public class PolicyConversionToolServiceImpl implements PolicyConversionToolServ
 		}catch(Exception e)
 		{
 //			e.printStackTrace();
-			throw new Exception("Invalid initial WSA configuration");
+			throw new Exception(Constants.ERROR_INVALID_INI_WSA_CONFIG);
 		}
 
 		return objConfig;
