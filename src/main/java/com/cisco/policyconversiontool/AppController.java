@@ -25,8 +25,7 @@ public class AppController {
 		logger.info("***********************************");
 		logger.info("Started Policy Conversion Tool");
 		logger.info("***********************************");
-/*Need to remove*/
-/**/		
+		
 		ApplicationContext applicationContext=new ClassPathXmlApplicationContext("applicationContext.xml");
 		PolicyConversionToolService policyConversionToolService=(PolicyConversionToolService)applicationContext.getBean("PolicyConversionToolServiceImpl");
 		PolicyConversionParameters objPolicyConversionParameters = new PolicyConversionParameters();
@@ -36,7 +35,6 @@ public class AppController {
 		objPolicyConversionParameters.setTargetAppliance("1");
 		objPolicyConversionParameters.setTargetSoftware("1");
 		objPolicyConversionParameters.setTargetConfiguration(CommonUtility.getStringFromInputStream(new FileInputStream("src/test/resource/fixtures/wsa/AllSettings.xml")));
-		DTDProvider.setAsyncosDTD(objPolicyConversionParameters.getTargetSoftware());
 		
 		ByteArrayOutputStream out = (ByteArrayOutputStream) policyConversionToolService.doPolicyConversion(objPolicyConversionParameters);
 		
