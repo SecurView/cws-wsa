@@ -20,7 +20,6 @@ public class PolicyConversionTool
 			System.out.println("\n\nExiting.");
 			System.exit(0);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			logger.error(e);
 			if (e.getMessage().startsWith("Error:")){
 				System.out.println("\n\n" + e.getMessage());
