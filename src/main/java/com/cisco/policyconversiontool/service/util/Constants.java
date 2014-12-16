@@ -2,6 +2,8 @@ package com.cisco.policyconversiontool.service.util;
 
 public class Constants 
 {
+	public final static String WSA_CONFIG_DTD_805_PATH = "src//main//resource//config//wsaDTD805.dtd";
+	public final static String WSA_CONFIG_DTD_806_PATH = "src//main//resource//config//wsaDTD806.dtd";
 	public  final static String WINNT="WinNT://";
     public  final static String LDAP="LDAP://";
     public  final static String AUTH_GROUP_TYPE_CUSTOM="";
