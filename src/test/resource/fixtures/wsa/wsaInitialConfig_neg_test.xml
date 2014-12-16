@@ -149,12 +149,8 @@
   </ntp>
 
   <https_certificate>
-    <certificate>
-
-    </certificate>
-    <key>
-
-    </key>
+    <certificate></certificate>
+    <key></key>
     <intermediate_certificate>
 
     </intermediate_certificate>
