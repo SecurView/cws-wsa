@@ -3,10 +3,13 @@ package com.cisco.policyconversiontool.util;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,10 +18,7 @@ import com.cisco.policyconversiontool.dto.cws.Schedule;
 import com.cisco.policyconversiontool.service.cws.parsar.CWSParser;
 import com.cisco.policyconversiontool.service.util.DTDProvider;
 
- 
-
 public class TestUtil {
-	
 	public final static String WSA = "wsa";
 	public final static String CWS = "cws";
 	public final static String WSA_INIT_CONFIG_NWF = "wsa/wsaInitialConfigNWF.xml";  // WSA intital Configuartion xml file name which is not well formed...
@@ -28,7 +28,6 @@ public class TestUtil {
 	public final static String WSA_INIT_CONFIG_NEG_TEST = "wsa/wsaInitialConfig_neg_test.xml";  // WSA Configuartion xml file name which is well formed and used for negative test...
 	public final static String CWS_CONFIG_FILE_PATH = "cws/SecurView_6_CiscoFixes.json";  // WSA intital Configuartion xml file name which is well formed...
 	public final static String CWS_CONFIG_FILE_PATH_US004 = "cws/SecurView__CiscoFixes__US004.json";  // WSA intital Configuartion xml file name which is well formed...
-
 	
 	public static List<Schedule> getSchedule(){
         ArrayList<Schedule> scheduleList = new ArrayList<Schedule>();
@@ -53,7 +52,7 @@ public class TestUtil {
     }
 	public static com.cisco.policyconversiontool.dto.wsa.asyncos805.Config getMockedConfig805()
    {
-	com.cisco.policyconversiontool.dto.wsa.asyncos805.Config objConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos805.Config.class);
+		com.cisco.policyconversiontool.dto.wsa.asyncos805.Config objConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos805.Config.class);
 	   
 		com.cisco.policyconversiontool.dto.wsa.asyncos805.WgaConfig objWgaConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos805.WgaConfig.class);
 	   when(objConfig.getWgaConfig()).thenReturn(objWgaConfig);
@@ -69,9 +68,9 @@ public class TestUtil {
 	   
 	   return objConfig;
    }
-	public static com.cisco.policyconversiontool.dto.wsa.asyncos806.Config getMockedConfig806()
+public static com.cisco.policyconversiontool.dto.wsa.asyncos806.Config getMockedConfig806()
    {
-	com.cisco.policyconversiontool.dto.wsa.asyncos806.Config objConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos806.Config.class);
+		com.cisco.policyconversiontool.dto.wsa.asyncos806.Config objConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos806.Config.class);
 	   
 		com.cisco.policyconversiontool.dto.wsa.asyncos806.WgaConfig objWgaConfig = mock(com.cisco.policyconversiontool.dto.wsa.asyncos806.WgaConfig.class);
 	   when(objConfig.getWgaConfig()).thenReturn(objWgaConfig);
@@ -104,11 +103,11 @@ public class TestUtil {
 	}
    public static CWSPolicy getCWSPolicyConfig(String fileName) throws Exception
    {
-	   return readCWSConfiguration(getInputStreams(fileName));
+	   return readCWSConfiguration(getStringFromInputStream(getInputStreams(fileName)));
    }
-   public static CWSPolicy readCWSConfiguration(InputStream cwsConfigStream) throws Exception {
+   public static CWSPolicy readCWSConfiguration(String cwsConfig) throws Exception {
 	  
-		return  (new CWSParser()).doParsing(cwsConfigStream);
+		return  (new CWSParser()).doParsing(cwsConfig);
 	}
    public static InputStream getInputStreams(String fileName) throws FileNotFoundException 
    {
@@ -117,8 +116,30 @@ public class TestUtil {
    }
    public static void policyConversionToolInitialSetup()
    {
-	   DTDProvider.setAsyncos805DTD(new File("src//main//resource//config//wsaDTD805.dtd"));
-       DTDProvider.setAsyncos806DTD(new File("src//main//resource//config//wsaDTD806.dtd"));
+//	   DTDProvider.setAsyncos805DTD(new File("src//main//resource//config//wsaDTD805.dtd"));
+//       DTDProvider.setAsyncos806DTD(new File("src//main//resource//config//wsaDTD806.dtd"));
    }
-
+   public static String getStringFromInputStream(InputStream is) {
+		 
+		BufferedReader br = null;
+		StringBuilder sb = new StringBuilder();
+		String line;
+		try {
+			br = new BufferedReader(new InputStreamReader(is));
+			while ((line = br.readLine()) != null) {
+				sb.append(line+"\r\n");
+			}
+		} catch (IOException e) {
+//			e.printStackTrace();
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+//					e.printStackTrace();
+				}
+			}
+		}
+		return sb.toString();
+	}
 }
