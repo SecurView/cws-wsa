@@ -8,7 +8,6 @@ import java.util.Map;
 import com.cisco.policyconversiontool.dao.ApplicationDAO;
 import com.cisco.policyconversiontool.dao.URLCategoryDAO;
 import com.cisco.policyconversiontool.dto.URLCategory;
-import com.cisco.policyconversiontool.dto.WSAMigrationParameters;
 import com.cisco.policyconversiontool.dto.cws.AdvRule;
 import com.cisco.policyconversiontool.dto.cws.AdvRuleArgument;
 import com.cisco.policyconversiontool.dto.cws.AuthGroup;
@@ -54,11 +53,9 @@ public class WSAMigrator
 		this.applicationDAO = applicationDAO;
 	}
 
-	public WSAMigratedConfig generateWSAPolicyConfig(CWSPolicy objCWSPolicy, WSAMigrationParameters wsaMigrationParameters,StringBuffer reviewBuffer) throws Exception 
+	public WSAMigratedConfig generateWSAPolicyConfig(CWSPolicy objCWSPolicy, StringBuffer reviewBuffer) throws Exception 
 	{
 		WSAMigratedConfig objWSAMigratedConfig = new WSAMigratedConfig();
-		
-		//
 		
 		// Log unused Http Filters.....
 		logUnusedHttpFilters(objCWSPolicy,reviewBuffer);
