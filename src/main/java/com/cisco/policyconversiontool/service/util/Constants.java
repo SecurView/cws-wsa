@@ -2,6 +2,14 @@ package com.cisco.policyconversiontool.service.util;
 
 public class Constants 
 {
+	
+	public final static String ERROR_INVALID_INI_WSA_CONFIG = "Invalid initial WSA configuration";
+	public final static String ERROR_TRG_SOFTWARE_INVALID = "Target Software is invalid.";
+	public final static String ERROR_TRG_CONFIG_INVALID = "Target Configuration is Invalid.";
+	public final static String ERROR_TRG_APPLIANCE_INVALID = "Target Appliance is Invalid.";
+	public final static String ERROR_SRC_CONFIG_INVALID = "Source Configuration is Invalid.";
+	
+	
 	public final static String WSA_CONFIG_DTD_805_PATH = "src//main//resource//config//wsaDTD805.dtd";
 	public final static String WSA_CONFIG_DTD_806_PATH = "src//main//resource//config//wsaDTD806.dtd";
 	public  final static String WINNT="WinNT://";
