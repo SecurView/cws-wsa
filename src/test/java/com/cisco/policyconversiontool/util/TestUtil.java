@@ -13,9 +13,11 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cisco.policyconversiontool.dto.PolicyConversionParameters;
 import com.cisco.policyconversiontool.dto.cws.CWSPolicy;
 import com.cisco.policyconversiontool.dto.cws.Schedule;
 import com.cisco.policyconversiontool.service.cws.parsar.CWSParser;
+import com.cisco.policyconversiontool.service.util.Constants;
 import com.cisco.policyconversiontool.service.util.DTDProvider;
 
 public class TestUtil {
@@ -29,6 +31,15 @@ public class TestUtil {
 	public final static String CWS_CONFIG_FILE_PATH = "cws/SecurView_6_CiscoFixes.json";  // WSA intital Configuartion xml file name which is well formed...
 	public final static String CWS_CONFIG_FILE_PATH_US004 = "cws/SecurView__CiscoFixes__US004.json";  // WSA intital Configuartion xml file name which is well formed...
 	
+	public static PolicyConversionParameters getMockedPolicyConversionParameters(String sourceConfiguration,String targetConfiguration)
+	{
+		PolicyConversionParameters objPolicyConversionParameters = mock(PolicyConversionParameters.class);
+		when(objPolicyConversionParameters.getSourceConfiguration()).thenReturn(sourceConfiguration);
+		when(objPolicyConversionParameters.getTargetConfiguration()).thenReturn(targetConfiguration);
+		when(objPolicyConversionParameters.getTargetAppliance()).thenReturn(Constants.TARGET_APPLIENCE_ID_WSA);
+		when(objPolicyConversionParameters.getTargetSoftware()).thenReturn(Constants.TARGET_SOWFWARE_WSA_ASYNCOS805);
+		return objPolicyConversionParameters;
+	}
 	public static List<Schedule> getSchedule(){
         ArrayList<Schedule> scheduleList = new ArrayList<Schedule>();
         for (int i = 1; i < 6; i++) {
