@@ -90,7 +90,7 @@ public class XMLGeneratorWSA100Asyncos806 implements ApplianceXMLGenerator{
 
 //	asyncos806.wsas100v
 	HashMap<String,String> objCustomCategoryHashMap;  
-public OutputStream generateXML(WSAMigratedConfig wsaMigratedConfig,Object objWSAInitialConfig) throws Exception {
+public String generateXML(WSAMigratedConfig wsaMigratedConfig,Object objWSAInitialConfig) throws Exception {
 		
 		Config objConfig = (Config)objWSAInitialConfig;
 
@@ -247,7 +247,7 @@ public OutputStream generateXML(WSAMigratedConfig wsaMigratedConfig,Object objWS
         jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
         objOutputStream.write("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\r\n<!DOCTYPE config SYSTEM \"config.dtd\">".getBytes());
         jaxbMarshaller.marshal(objConfig, objOutputStream);
-		return (OutputStream)objOutputStream;
+        return new String(objOutputStream.toByteArray(), "ISO-8859-1");
 	}
 	private void addIdentityDetailsInPolicy(ProxAclGroup objProxAclGroup,List<WSAIdentity> wsaIdentityList,String realmName) {
 
