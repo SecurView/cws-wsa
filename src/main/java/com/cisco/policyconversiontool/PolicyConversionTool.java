@@ -21,11 +21,12 @@ public class PolicyConversionTool
 			System.exit(0);
 		} catch (Exception e) {
 			logger.error(e);
-			if (e.getMessage().startsWith("Error:")){
-				System.out.println("\n\n" + e.getMessage());
-			}else{
-				System.out.println("\n\nError: Unexpected error occurred during processing. Please check the application log file under the logs sub-directory for further details");
-			}
+			e.printStackTrace();
+//			if (e.getMessage().startsWith("Error:")){
+//				System.out.println("\n\n" + e.getMessage());
+//			}else{
+//				System.out.println("\n\nError: Unexpected error occurred during processing. Please check the application log file under the logs sub-directory for further details");
+//			}
 			System.out.println("\n\nExiting.");
 			System.exit(0);
 		}
