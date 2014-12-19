@@ -3,6 +3,9 @@ package com.cisco.policyconversiontool.service;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -11,6 +14,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
@@ -20,12 +24,14 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import com.cisco.policyconversiontool.dao.ApplianceDAO;
+import com.cisco.policyconversiontool.dao.MIMETypeDAO;
 import com.cisco.policyconversiontool.dao.VendorDAO;
 import com.cisco.policyconversiontool.dao.VendorSoftwareDAO;
 import com.cisco.policyconversiontool.dto.PolicyConversionParameters;
 import com.cisco.policyconversiontool.dto.Software;
 import com.cisco.policyconversiontool.dto.WSAMigrationPageInfo;
 import com.cisco.policyconversiontool.dto.cws.CWSPolicy;
+import com.cisco.policyconversiontool.dto.wsa.asyncos805.Config;
 import com.cisco.policyconversiontool.dto.wsa.wsanormalized.WSAMigratedConfig;
 import com.cisco.policyconversiontool.service.cws.parsar.ApplianceParser;
 import com.cisco.policyconversiontool.service.cws.parsar.ApplianceParserFactory;
@@ -37,6 +43,7 @@ import com.cisco.policyconversiontool.service.util.LogUtil;
 import com.cisco.policyconversiontool.service.wsa.migrator.ApplianceXMLGenerator;
 import com.cisco.policyconversiontool.service.wsa.migrator.ApplianceXMLGeneratorFactory;
 import com.cisco.policyconversiontool.service.wsa.migrator.WSAMigrator;
+import com.cisco.policyconversiontool.util.TestUtil;
 
 public class PolicyConversionToolServiceImpl implements PolicyConversionToolService {
 
@@ -45,6 +52,15 @@ public class PolicyConversionToolServiceImpl implements PolicyConversionToolServ
 	private VendorSoftwareDAO vendorSoftwareDAO;
 	
 	private WSAMigrator wsaMigrator;
+	
+	private MIMETypeDAO mimeTypeDAOImpl;
+	public MIMETypeDAO getMimeTypeDAOImpl() {
+		return mimeTypeDAOImpl;
+	}
+
+	public void setMimeTypeDAOImpl(MIMETypeDAO mimeTypeDAOImpl) {
+		this.mimeTypeDAOImpl = mimeTypeDAOImpl;
+	}
 	public VendorDAO getVendorDAO() {
 		return vendorDAO;
 	}
@@ -280,5 +296,20 @@ public class PolicyConversionToolServiceImpl implements PolicyConversionToolServ
 		else
 			return false;
 	}
-
+	public static void main(String ar[]) throws Exception
+	{
+		PolicyConversionToolServiceImpl imp = new PolicyConversionToolServiceImpl();
+		Object obj = imp.readWSAConfiguration(TestUtil.getStringFromInputStream(new FileInputStream("E:\\temp.xml")), "1");
+		
+		
+		JAXBContext jaxbContext = JAXBContext.newInstance(Config.class);
+		Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+		FileOutputStream objOutputStream = new FileOutputStream("E:\\tempOUt.xml");
+        jaxbMarshaller.setProperty(Marshaller.JAXB_ENCODING,"ISO-8859-1");
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
+        objOutputStream.write("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\r\n<!DOCTYPE config SYSTEM \"config.dtd\">".getBytes());
+        jaxbMarshaller.marshal(obj, objOutputStream);
+		System.out.println("123");
+	}
 }
