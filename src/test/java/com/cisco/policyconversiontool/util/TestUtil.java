@@ -132,25 +132,23 @@ public static com.cisco.policyconversiontool.dto.wsa.asyncos806.Config getMocked
    }
    public static String getStringFromInputStream(InputStream is) {
 		 
-		BufferedReader br = null;
-		StringBuilder sb = new StringBuilder();
-		String line;
+		BufferedReader objBufferReader = null;
+		StringBuilder stringBuffer = new StringBuilder();
+		String objLineString;
 		try {
-			br = new BufferedReader(new InputStreamReader(is));
-			while ((line = br.readLine()) != null) {
-				sb.append(line+"\r\n");
+			objBufferReader = new BufferedReader(new InputStreamReader(is));
+			while ((objLineString = objBufferReader.readLine()) != null) {
+				stringBuffer.append(objLineString+"\r\n");
 			}
 		} catch (IOException e) {
-//			e.printStackTrace();
 		} finally {
-			if (br != null) {
+			if (objBufferReader != null) {
 				try {
-					br.close();
+					objBufferReader.close();
 				} catch (IOException e) {
-//					e.printStackTrace();
 				}
 			}
 		}
-		return sb.toString();
+		return stringBuffer.toString();
 	}
 }
