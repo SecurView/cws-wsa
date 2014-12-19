@@ -1,18 +1,11 @@
 package com.cisco.policyconversiontool;
 
- 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -23,7 +16,6 @@ import org.junit.runner.notification.Failure;
 import com.cisco.policyconversiontool.dto.PolicyConversionParameters;
 import com.cisco.policyconversiontool.service.PolicyConversionToolServiceImpl;
 import com.cisco.policyconversiontool.service.util.Constants;
-import com.cisco.policyconversiontool.service.util.DTDProvider;
 import com.cisco.policyconversiontool.util.TestUtil;
 
 
@@ -70,12 +62,12 @@ public class MockTestClassFirst {
 	 		thrown.expect(Exception.class);
 	 		thrown.expectMessage(Constants.ERROR_INVALID_INI_WSA_CONFIG);
 	 		
-	 		String wsaInitialConfig = TestUtil.getStringFromInputStream(TestUtil.getInputStreams(TestUtil.WSA_INIT_CONFIG_NWF));
-			   PolicyConversionParameters objPolicyConversionParameters = TestUtil.getMockedPolicyConversionParameters("{}", wsaInitialConfig);
-			   StringBuffer reviewBuffer = new StringBuffer();
-			   com.cisco.policyconversiontool.dto.wsa.asyncos805.Config objConfig = 
-			(com.cisco.policyconversiontool.dto.wsa.asyncos805.Config) 
-			objPolicyConversionToolServiceImpl.validateInitalConfig(objPolicyConversionParameters, reviewBuffer);
+			String wsaInitialConfig = TestUtil.getStringFromInputStream(TestUtil.getInputStreams(TestUtil.WSA_INIT_CONFIG_NWF));
+			PolicyConversionParameters objPolicyConversionParameters = TestUtil.getMockedPolicyConversionParameters("{}", wsaInitialConfig);
+			StringBuffer reviewBuffer = new StringBuffer();
+			com.cisco.policyconversiontool.dto.wsa.asyncos805.Config objConfig = 
+					(com.cisco.policyconversiontool.dto.wsa.asyncos805.Config) 
+					objPolicyConversionToolServiceImpl.validateInitalConfig(objPolicyConversionParameters, reviewBuffer);
 	   }
 	 	/**
 	 	 * Test case created to validate behavior for correct ( well formed) WSA configuration.
@@ -229,7 +221,7 @@ public class MockTestClassFirst {
 	   public static void main(String[] args) {
 		     Result result = JUnitCore.runClasses(MockTestClassFirst.class);
 		      for (Failure failure : result.getFailures()) {
-		         System.out.println(failure.getDescription()+"==Exception Msg :==>"+failure.getMessage()+"==>" + failure.getTrace());
+		         System.out.println(failure.getDescription()+"==Exception Msg :==>"+failure.getMessage()+"==>"+ failure.getTrace());
 		      }
 		      System.out.print("==>Test Result : "+result.wasSuccessful());
 		   }
