@@ -14,11 +14,14 @@ public class WSAPolicy implements Serializable , Comparator<WSAPolicy>, Comparab
 	private WSATimeDefinition timeDefinition;
 	private String clientType;
 	private List<WSACategory> wsaCategoryList;
-	private List<WSACustomCategory> wsaCustomCategoryList;
+	private WSACustomCategory wsaCustomCategoryDomain;
+	private WSACustomCategory wsaCustomCategoryException;
 	private List<WSAApplication> wsaApplicationList;
 	private List<WSAUserAgent> wsaUserAgentList;
 	private List<String> wsaCustomUserAgentList;
 	private List<WSAMIMEType> wsaMIMETypeList;
+	private List<WSAMIMEType> wsaCustomMIMETypeList;
+	private List<String> wsaFileTypeList;
 	
 	public String getName() {
 		return name;
@@ -51,13 +54,6 @@ public class WSAPolicy implements Serializable , Comparator<WSAPolicy>, Comparab
 		this.wsaApplicationList = wsaApplicationList;
 	}
 
-	public List<WSACustomCategory> getWsaCustomCategoryList() {
-		return wsaCustomCategoryList;
-	}
-	public void setWsaCustomCategoryList(
-			List<WSACustomCategory> wsaCustomCategoryList) {
-		this.wsaCustomCategoryList = wsaCustomCategoryList;
-	}
 	public String getDescription() {
 		return description;
 	}
@@ -97,6 +93,30 @@ public class WSAPolicy implements Serializable , Comparator<WSAPolicy>, Comparab
 	public int compare(WSAPolicy o1, WSAPolicy o2) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+	public List<WSAMIMEType> getWsaCustomMIMETypeList() {
+		return wsaCustomMIMETypeList;
+	}
+	public void setWsaCustomMIMETypeList(List<WSAMIMEType> wsaCustomMIMETypeList) {
+		this.wsaCustomMIMETypeList = wsaCustomMIMETypeList;
+	}
+	public List<String> getWsaFileTypeList() {
+		return wsaFileTypeList;
+	}
+	public void setWsaFileTypeList(List<String> wsaFileTypeList) {
+		this.wsaFileTypeList = wsaFileTypeList;
+	}
+	public WSACustomCategory getWsaCustomCategoryException() {
+		return wsaCustomCategoryException;
+	}
+	public void setWsaCustomCategoryException(WSACustomCategory wsaCustomCategoryException) {
+		this.wsaCustomCategoryException = wsaCustomCategoryException;
+	}
+	public WSACustomCategory getWsaCustomCategoryDomain() {
+		return wsaCustomCategoryDomain;
+	}
+	public void setWsaCustomCategoryDomain(WSACustomCategory wsaCustomCategoryDomain) {
+		this.wsaCustomCategoryDomain = wsaCustomCategoryDomain;
 	}
 		
 }
